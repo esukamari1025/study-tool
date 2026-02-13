@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>学習記録管理アプリ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>学習記録管理</h1>
+
+<h2>学習記録の登録</h2>
+<form id="studyForm">
+<label>
+学習日：
+<input type="date" id="date" required>
+</label><br>
+
+<label>
+科目：
+<input type="text" id="subject" required>
+</label><br>
+
+<label>
+学習内容：
+<input type="text" id="content" required>
+</label><br>
+
+<label>
+学習区分：
+<select id="studyType">
+<option value="" disabled selected>選択してください</option>
+<option value="morning">午前問題</option>
+<option value="afternoon">午後問題</option>
+<option value="book">参考書</option>
+<option value="review">復習</option>
+<option value="mock">模試</option>
+</select>
+</label>
+
+<div id="studyAmountArea">
+
+<div class="amount-field" data-type="morning">
+問題数：<input type="number" id="amountMorning">
+</div>
+
+<div class="amount-field" data-type="afternoon">
+設問数：<input type="number" id="amountAfternoon">
+</div>
+
+<div class="amount-field" data-type="book">
+ページ数：<input type="number" id="amountBook">
+</div>
+
+<div class="amount-field" data-type="review">
+時間（分）：<input type="number" id="amountReview">
+</div>
+
+<div class="amount-field" data-type="mock">
+得点：<input type="number" id="amountMock">
+</div>
+
+</div>
+
+<div id="afternoonExtra" style="display:none;">
+<label>
+    午後分野：
+    <select id="afternoonField">
+    <option value="" disabled selected>選択してください</option>
+    <option value="情報セキュリティ">情報セキュリティ</option>
+    <option value="経営戦略">経営戦略</option>
+    <option value="プログラミング">プログラミング</option>
+    <option value="システムアーキテクチャ">システムアーキテクチャ</option>
+    <option value="ネットワーク">ネットワーク</option>
+    <option value="データベース">データベース</option>
+    <option value="組み込みシステム開発">組み込みシステム開発</option>
+    <option value="情報システム開発">情報システム開発</option>
+    <option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
+    <option value="サービスマネジメント">サービスマネジメント</option>
+    <option value="システム監査">システム監査</option>
+    </select>
+</label>
+</div>
+
+
+
+<label>
+理解度（1〜5）：
+<input type="number" id="level" min="1" max="5" required>
+</label><br>
+
+<button type="submit">登録</button>
+</form>
+
+<h3>午前CSV取込</h3>
+<input type="file" id="morningCsvInput" accept=".csv">
+
+<label>
+    科目で絞り込み：
+    <select id="filterSubject">
+    <option value="">すべて</option>
+    </select>
+    </label>
+
+    <label>
+    学習区分で絞り込み：
+    <select id="filterStudyType">
+    <option value="">すべて</option>
+    <option value="morning">午前問題</option>
+    <option value="afternoon">午後問題</option>
+    <option value="book">参考書</option>
+    <option value="review">復習</option>
+    <option value="mock">模試</option>
+    </select>
+    </label>
+
+    <label>
+    午後分野で絞り込み：
+    <select id="filterField">
+    <option value="">すべて</option>
+    <option value="情報セキュリティ">情報セキュリティ</option>
+    <option value="経営戦略">経営戦略</option>
+    <option value="プログラミング">プログラミング</option>
+    <option value="システムアーキテクチャ">システムアーキテクチャ</option>
+    <option value="ネットワーク">ネットワーク</option>
+    <option value="データベース">データベース</option>
+    <option value="組み込みシステム開発">組み込みシステム開発</option>
+    <option value="情報システム開発">情報システム開発</option>
+    <option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
+    <option value="サービスマネジメント">サービスマネジメント</option>
+    <option value="システム監査">システム監査</option>
+    </select>
+    </label>
+
+
+<h2>学習記録一覧</h2>
+<table border="1">
+<thead>
+<tr>
+<th>日付</th>
+<th>科目</th>
+<th>内容</th>
+<th>区分</th>
+<th>学習量</th>
+<th>理解度</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody id="logList">
+</tbody>
+</table>
+
+<h3>科目別 平均理解度</h3>
+<ul id="subjectAverage"></ul>
+
+<h3>科目別 平均理解度（グラフ）</h3>
+<canvas id="avgChart" width="400" height="200"></canvas>
+
+<section>
+    <h3>午後問題 分野別 平均理解度</h3>
+    <ul id="afternoonFieldAverage"></ul>
+</section>
+
+<h3>午後問題 分野別 平均理解度（グラフ）</h3>
+<canvas id="afternoonChart" width="400" height="200"></canvas>
+
+<h3>苦手メモ</h3>
+
+<form id="weakForm">
+<label>
+科目：
+<input type="text" id="weakSubject" required>
+</label>
+
+<label>
+内容：
+<input type="text" id="weakContent" required>
+</label>
+
+<label>
+優先度：
+<select id="weakPriority">
+<option value="1">高</option>
+<option value="2">中</option>
+<option value="3">低</option>
+</select>
+</label>
+
+<button type="submit">メモ追加</button>
+</form>
+
+<ul id="weakList"></ul>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="main.js"></script>
+
+<div id="toast" class="toast"></div>
+
+</body>
+</html>
