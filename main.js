@@ -2,9 +2,9 @@
 // DB 設定
 // ==========================
 const DB_NAME = "studyDB";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 let db;
-
+let editingId = null;
 
 // ==========================
 // IndexedDB を開く
@@ -14,27 +14,36 @@ const request = indexedDB.open(DB_NAME, DB_VERSION);
 request.onupgradeneeded = (event) => {
 const db = event.target.result;
 
-// 学習記録ストア
-if (!db.objectStoreNames.contains("study_logs")) {
-const store = db.createObjectStore("study_logs", {
-    keyPath: "id",
-    autoIncrement: true
-});
-store.createIndex("subject", "subject", { unique: false });
+// --- 学習記録ストア ---
+if (db.objectStoreNames.contains("study_logs")) {
+db.deleteObjectStore("study_logs");
 }
 
-// 苦手メモストア
-if (!db.objectStoreNames.contains("weak_points")) {
-const store = db.createObjectStore("weak_points", {
-    keyPath: "id",
-    autoIncrement: true
+const studyStore = db.createObjectStore("study_logs", {
+keyPath: "id",
+autoIncrement: true
 });
-store.createIndex("priority", "priority", { unique: false });
+
+studyStore.createIndex("examType", "examType", { unique: false });
+//studyStore.createIndex("subject", "subject", { unique: false });
+studyStore.createIndex("category", "category", { unique: false });
+studyStore.createIndex("studyDate", "studyDate", { unique: false });
+
+// --- 苦手メモストア ---
+if (!db.objectStoreNames.contains("weak_points")) {
+const weakStore = db.createObjectStore("weak_points", {
+keyPath: "id",
+autoIncrement: true
+});
+weakStore.createIndex("priority", "priority", { unique: false });
 }
 };
 
 request.onsuccess = (event) => {
 db = event.target.result;
+document.getElementById("date").valueAsDate = new Date();
+
+updateFilterOptionsAll();
 displayLogs();
 displayWeakPoints();
 };
@@ -51,106 +60,110 @@ document.getElementById("studyForm").addEventListener("submit", (e) => {
 e.preventDefault();
 
 const studyType = document.getElementById("studyType").value;
-if (!studyType) {
-alert("学習区分を選択してください");
-return;
+
+let problems = 0;
+let correct = 0;
+let amount = 0;
+
+if (studyType === "book") {
+    amount = Number(document.getElementById("amountBook").value) || 0;
 }
+else if (studyType === "review") {
+    amount = Number(document.getElementById("amountReview").value) || 0;
+}
+else if (studyType === "mock") {
+    amount = Number(document.getElementById("amountMock").value) || 0;
+}
+else {
+    amount = problems;
+}
+
+if (studyType === "morning") {
+problems = Number(document.getElementById("amountMorning").value) || 0;
+correct = Number(document.getElementById("correctCount").value) || 0;
+amount = problems;
+}
+else if (studyType === "afternoon") {
+problems = Number(document.getElementById("amountAfternoon").value) || 0;
+correct = Number(document.getElementById("correctCount").value) || 0;
+amount = problems;
+}
+
+const accuracy = problems > 0 ? correct / problems : 0;
+const passLine = 0.6;
+
+let result = "-";
+
+if (problems > 0) {
+    result = accuracy >= passLine ? "pass" : "fail";
+}
+
 
 const record = {
-date: document.getElementById("date").value,
-subject: document.getElementById("subject").value,
+examType: document.getElementById("examType").value,
+section: document.getElementById("section").value,
+category: document.getElementById("category").value,
+studyType: studyType,
 content: document.getElementById("content").value,
-level: Number(document.getElementById("level").value),
-studyType,
-amount: null
+amount: amount,
+problems: problems,
+correct: correct,
+accuracy: accuracy,
+result: result,
+understanding: Number(document.getElementById("level").value),
+studyDate: document.getElementById("date").value,
+evaluation: document.getElementById("evaluation")?.value || ""
 };
-
-// 午後なら分野必須
-if (studyType === "afternoon") {
-const field = document.getElementById("afternoonField").value;
-if (!field) {
-    alert("午後問題は分野を選択してください");
-    return;
-}
-record.field = field;
-}
-
-// 学習量の取得
-const amountMap = {
-morning: "amountMorning",
-afternoon: "amountAfternoon",
-book: "amountBook",
-review: "amountReview",
-mock: "amountMock"
-};
-
-const id = amountMap[studyType];
-if (id) {
-record.amount = Number(document.getElementById(id).value);
-}
 
 const tx = db.transaction("study_logs", "readwrite");
-tx.objectStore("study_logs").add(record);
+if (editingId) {
+    record.id = editingId;
+    tx.objectStore("study_logs").put(record);
+} else {
+    tx.objectStore("study_logs").add(record);
+}
+
 
 tx.oncomplete = () => {
-    e.target.reset();
-    displayLogs();
-    showToast("学習記録を登録しました", "success");
-};
-}
+e.target.reset();
+document.getElementById("date").valueAsDate = new Date();
+displayLogs();
+showToast(
+    editingId ? "学習記録を更新しました" : "学習記録を登録しました",
+    "success"
 );
+
+editingId = null;
+
+const btn = document.getElementById("submitBtn");
+btn.textContent = "登録";
+btn.classList.remove("edit-mode");
+};
+});
 
 
 // ==========================
 // 苦手メモ  記録
 // ==========================
 document.getElementById("weakForm").addEventListener("submit", (e) => {
-    e.preventDefault();
+e.preventDefault();
 
-    const record = {
-        subject: document.getElementById("weakSubject").value,
-        content: document.getElementById("weakContent").value,
-        priority: Number(document.getElementById("weakPriority").value)
-    };
+const record = {
+subject: document.getElementById("weakSubject").value,
+content: document.getElementById("weakContent").value,
+priority: Number(document.getElementById("weakPriority").value)
+};
 
-    const tx = db.transaction("weak_points", "readwrite");
-    tx.objectStore("weak_points").add(record);
+const tx = db.transaction("weak_points", "readwrite");
+tx.objectStore("weak_points").add(record);
 
-    tx.oncomplete = () => {
-        e.target.reset();
-        displayWeakPoints();
-        showToast("苦手メモを追加しました", "success");
-    };
+tx.oncomplete = () => {
+e.target.reset();
+displayWeakPoints();
+showToast("苦手メモを追加しました", "success");
+};
 });
 
-
-
-// ==========================
-// 学習区分 切替
-// ==========================
-document.getElementById("studyType").addEventListener("change", (e) => {
-
-const type = e.target.value;
-
-document.querySelectorAll(".amount-field")
-.forEach(el => el.style.display = "none");
-
-const target = document.querySelector(`.amount-field[data-type="${type}"]`);
-if (target) target.style.display = "block";
-
-document.getElementById("afternoonExtra").style.display =
-type === "afternoon" ? "block" : "none";
-});
-
-
-// ==========================
-// CSV取込（午前）
-// ==========================
-document.getElementById("morningCsvInput")
-.addEventListener("change", (e) => {
-const file = e.target.files[0];
-if (file) importMorningCSV(file);
-});
 
 
 // ==========================
@@ -162,21 +175,28 @@ document.getElementById("filterSubject")
 document.getElementById("filterStudyType")
 ?.addEventListener("change", applyFilters);
 
-document.getElementById("filterField")
+document.getElementById("filterSection")
+?.addEventListener("change", applyFilters);
+
+document.getElementById("filterExam")
 ?.addEventListener("change", applyFilters);
 
 function applyFilters() {
-const subject = document.getElementById("filterSubject").value;
-const studyType = document.getElementById("filterStudyType")?.value || "";
-const field = document.getElementById("filterField")?.value || "";
+    const subject = document.getElementById("filterSubject").value;
+    const section = document.getElementById("filterSection").value;
+    const studyType = document.getElementById("filterStudyType").value;
+    const exam = document.getElementById("filterExam").value;
 
-displayLogs(subject, studyType, field);
-}
+    displayLogs(subject, section, studyType,exam);
+    }
+
+
 
 // ==========================
 // 学習記録表示
 // ==========================
-function displayLogs(subject = "", studyType= "", field= "") {
+function displayLogs(subject = "",section = "", studyType = "", exam=""){
+
 
 const tbody = document.getElementById("logList");
 tbody.innerHTML = "";
@@ -192,55 +212,87 @@ const cursor = e.target.result;
 
 if (!cursor) {
 
-    // 日付の古い順に並び替え
-    records.sort((a, b) => new Date(a.date) - new Date(b.date));
+// 日付の古い順に並び替え
+records.sort((a, b) => new Date(a.studyDate) - new Date(b.studyDate));
 
-    records.forEach(r => {
+records.forEach(r => {
 
-        const tr = document.createElement("tr");
+const tr = document.createElement("tr");
 
-        if (r.level <= 2) tr.classList.add("level-low");
-        else if (r.level === 3) tr.classList.add("level-mid");
-        else tr.classList.add("level-high");
+if (r.understanding <= 2) tr.classList.add("level-low");
+else if (r.understanding === 3) tr.classList.add("level-mid");
+else tr.classList.add("level-high");
 
-        const fieldText =
-            r.studyType === "afternoon" && r.field
-                ? `（${r.field}）`
-                : "";
-        
 
-        tr.innerHTML = `
-            <td>${r.date}</td>
-            <td>${r.subject}</td>
-            <td>${r.content}${fieldText}</td>
-            <td>${studyTypeLabel(r.studyType)}</td>
-            <td>${formatStudyAmount(r.studyType, r.amount)}</td>
-            <td>${r.level}</td>
-        `;
+const accuracyText = r.problems > 0
+? (r.accuracy * 100).toFixed(1) + "%"
+: "-";
 
-        const td = document.createElement("td");
-        const btn = document.createElement("button");
-        btn.textContent = "削除";
-        btn.onclick = () => deleteLog(r);
-        td.appendChild(btn);
-        tr.appendChild(td);
+const result =
+r.result === "pass" ? "合格圏"
+: r.result === "fail" ? "未達"
+: "-";
 
-        tbody.appendChild(tr);
-    });
+const resultClass = r.result || "";
 
-    updateSubjectAverageChart(records);
-    updateAfternoonFieldChart(records);
-    calculateAfternoonFieldAverage(records);
-    updateFilterOptionsAll();
 
-    return;
+tr.innerHTML = `
+<td>${r.examType}</td>
+<td>${r.studyDate}</td>
+<td>${r.category}</td>
+<td>${r.content}</td>
+<td>${r.section}</td>
+<td>${{
+    morning:"午前問題",
+    afternoon:"午後問題",
+    book:"参考書",
+    review:"復習",
+    mock:"模試"
+}[r.studyType]}</td>
+<td>${r.amount || "-"}</td>
+<td>${accuracyText}</td>
+<td class="${resultClass}">${result}</td>
+<td>${r.understanding}</td>
+`;
+
+const td = document.createElement("td");
+const editBtn = document.createElement("button");
+editBtn.textContent = "編集";
+editBtn.classList.add("edit-btn");
+editBtn.onclick = () => loadForEdit(r);
+td.appendChild(editBtn);
+
+const btn = document.createElement("button");
+btn.textContent = "削除";
+btn.classList.add("delete-btn");
+btn.onclick = () => deleteLog(r);
+td.appendChild(btn);
+tr.appendChild(td);
+
+tbody.appendChild(tr);
+});
+
+updateExamChart(records);
+updateStudyVolumeChart(records);
+
+return;
 }
 
 
 const r = cursor.value;
 
-// フィルター判定
-if (subject && r.subject !== subject) {
+if (exam && r.examType !== exam) {
+    cursor.continue();
+    return;
+}
+
+
+if (subject && r.category !== subject) {
+    cursor.continue();
+    return;
+}
+
+if (section && r.section !== section) {
     cursor.continue();
     return;
 }
@@ -250,13 +302,11 @@ if (studyType && r.studyType !== studyType) {
     return;
 }
 
-if (field && r.field !== field) {
-    cursor.continue();
-    return;
-}
 
 records.push(r);
 cursor.continue();
+
+
 };
 }
 
@@ -265,86 +315,28 @@ cursor.continue();
 // 削除
 // ==========================
 function deleteLog(record) {
-    const fieldText =
-    record.studyType === "afternoon" && record.field
-        ? `（${record.field}）`
-        : "";
-
-    const message =
-        `「${record.subject} - ${record.content}${fieldText}」を削除しますか？`;
+const message =
+`「${record.category} - ${record.content}」を削除しますか？`;
 
 
-    const ok = confirm(message);
-    if (!ok) return;
+const ok = confirm(message);
+if (!ok) return;
 
-    const tx = db.transaction("study_logs", "readwrite");
-    tx.objectStore("study_logs").delete(record.id);
+const tx = db.transaction("study_logs", "readwrite");
+tx.objectStore("study_logs").delete(record.id);
 
-    tx.oncomplete = () => {
+tx.oncomplete = () => {
 
-        showToast("学習記録を削除しました","delete");
+showToast("学習記録を削除しました","delete");
 
-        const subject =
-            document.getElementById("filterSubject").value;
-        applyFilters();
-    };
+const subject =
+document.getElementById("filterSubject").value;
+applyFilters();
+};
 }
 
 
-// ==========================
-// 科目別 平均グラフ
-// ==========================
-function updateSubjectAverageChart(records) {
-
-    const ul = document.getElementById("subjectAverage");
-    if (!ul) return;
-
-    ul.innerHTML = "";
-
-    const totals = {};
-
-    records.forEach(r => {
-
-        const key = `${r.subject}｜${r.studyType}`;
-
-        if (!totals[key]) {
-            totals[key] = { sum: 0, count: 0 };
-        }
-
-        totals[key].sum += r.level;
-        totals[key].count++;
-    });
-
-    const labels = [];
-    const values = [];
-    const colors = [];
-
-    Object.keys(totals).forEach(key => {
-
-        const avg = totals[key].sum / totals[key].count;
-
-        const [subject, type] = key.split("｜");
-
-        const li = document.createElement("li");
-        li.textContent =
-            `${subject}（${studyTypeLabel(type)}）：平均理解度 ${avg.toFixed(2)}`;
-
-        if (avg < 2.5) {
-            li.classList.add("avg-weak");
-            colors.push("rgba(255,99,132,0.7)");
-        } else if (avg < 3.5) {
-            li.classList.add("avg-normal");
-            colors.push("rgba(255,159,64,0.7)");
-        } else {
-            li.classList.add("avg-strong");
-            colors.push("rgba(75,192,192,0.7)");
-        }
-
-        ul.appendChild(li);
-
-        labels.push(`${subject}-${studyTypeLabel(type)}`);
-        values.push(avg.toFixed(2));
-    });
+function updateExamChart(records) {
 
     const ctx = document.getElementById("avgChart").getContext("2d");
 
@@ -352,164 +344,96 @@ function updateSubjectAverageChart(records) {
         window.subjectChart.destroy();
     }
 
+    let morningTotal = 0;
+    let morningCount = 0;
+
+    let afternoonTotal = 0;
+    let afternoonCount = 0;
+
+    let mockTotal = 0;
+    let mockCount = 0;
+
+    records.forEach(r => {
+        if (r.studyType === "morning" && r.problems > 0) {
+            morningTotal += r.accuracy;
+            morningCount++;
+        }
+
+        if (r.studyType === "afternoon" && r.problems > 0) {
+            afternoonTotal += r.accuracy;
+            afternoonCount++;
+        }
+
+        if (r.studyType === "mock" && r.amount > 0) {
+            mockTotal += r.accuracy;
+            mockCount++;
+        }
+    });
+
+    const morningAvg = morningCount ? (morningTotal / morningCount) * 100 : 0;
+    const afternoonAvg = afternoonCount ? (afternoonTotal / afternoonCount) * 100 : 0;
+    const mockAvg = mockCount ? (mockTotal / mockCount) : 0;
+
     window.subjectChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels,
+            labels: ["午前", "午後", "模試"],
             datasets: [{
-                label: "科目×区分 平均理解度",
-                data: values,
-                backgroundColor: colors
+                label: "平均正答率(%)",
+                data: [
+                    morningAvg.toFixed(1),
+                    afternoonAvg.toFixed(1),
+                    mockAvg.toFixed(1)
+                ]
             }]
         },
         options: {
             scales: {
-                y: { min: 0, max: 5, ticks: { stepSize: 1 } }
+                y: { min: 0, max: 100 }
             }
         }
     });
 }
 
 
-// ==========================
-// 午後 分野別グラフ
-// ==========================
-function updateAfternoonFieldChart(records) {
+    function updateStudyVolumeChart(records) {
 
-const totals = {};
+        const ctx = document.getElementById("afternoonChart").getContext("2d");
+    
+        if (window.volumeChart instanceof Chart) {
+            window.volumeChart.destroy();
+        }
+    
+        let bookTotal = 0;
+        let reviewTotal = 0;
+    
+        records.forEach(r => {
+            if (r.studyType === "book") {
+                bookTotal += r.amount || 0;
+            }
+            if (r.studyType === "review") {
+                reviewTotal += r.amount || 0;
+            }
 
-records.forEach(r => {
-if (r.studyType !== "afternoon" || !r.field) return;
-
-const key = `${r.subject}-${r.field}`;
-
-if (!totals[key]) totals[key] = { sum: 0, count: 0 };
-
-totals[key].sum += r.level;
-totals[key].count++;
-});
-
-const labels = [];
-const values = [];
-const colors = [];
-
-Object.keys(totals).forEach(key => {
-
-const avg = totals[key].sum / totals[key].count;
-
-labels.push(key);
-values.push(avg.toFixed(2));
-
-if (avg < 2.5) colors.push("rgba(255,99,132,0.7)");
-else if (avg < 3.5) colors.push("rgba(255,159,64,0.7)");
-else colors.push("rgba(75,192,192,0.7)");
-});
-
-const ctx = document.getElementById("afternoonChart").getContext("2d");
-
-if (window.afternoonChart instanceof Chart) window.afternoonChart.destroy();
-
-window.afternoonChart = new Chart(ctx, {
-type: "bar",
-data: {
-    labels,
-    datasets: [{
-        label: "午後分野別 平均理解度",
-        data: values,
-        backgroundColor: colors
-    }]
-},
-options: {
-    scales: {
-        y: { min: 0, max: 5, ticks: { stepSize: 1 } }
+        });
+    
+        window.volumeChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["参考書(ページ)", "復習(分)"],
+                datasets: [{
+                    label: "累計学習量",
+                    data: [bookTotal, reviewTotal]
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
     }
-}
-});
-}
 
-
-// ==========================
-// CSV取込ロジック
-// ==========================
-function convertRateToLevel(correct, total) {
-
-const rate = correct / total;
-
-if (rate < 0.5) return 1;
-if (rate < 0.6) return 2;
-if (rate < 0.7) return 3;
-if (rate < 0.8) return 4;
-return 5;
-}
-
-function importMorningCSV(file) {
-
-const reader = new FileReader();
-
-reader.onload = function(event) {
-
-const text = event.target.result;
-const lines = text.split("\n").slice(1);
-
-let total = 0;
-let correct = 0;
-
-lines.forEach(line => {
-
-    if (!line.trim()) return;
-
-    const cols = line.split(",");
-    const result = cols[1].trim();
-
-    total++;
-    if (result === "○") correct++;
-});
-
-const level = convertRateToLevel(correct, total);
-
-const record = {
-    date: new Date().toISOString().split("T")[0],
-    subject: "応用情報技術者試験",
-    content: "午前CSV取込",
-    studyType: "morning",
-    amount: total,
-    correct,
-    level
-};
-
-const tx = db.transaction("study_logs", "readwrite");
-tx.objectStore("study_logs").add(record);
-
-tx.oncomplete = displayLogs;
-};
-
-reader.readAsText(file, "UTF-8");
-}
-
-
-// ==========================
-// 表示用ユーティリティ
-// ==========================
-function studyTypeLabel(type) {
-return {
-morning: "午前問題",
-afternoon: "午後問題",
-book: "参考書",
-review: "復習",
-mock: "模試"
-}[type] || "";
-}
-
-function formatStudyAmount(type, amount) {
-if (amount == null) return "";
-return {
-morning: `${amount}問`,
-afternoon: `設問${amount}`,
-book: `${amount}ページ`,
-review: `${amount}分`,
-mock: `${amount}点`
-}[type] || "";
-}
 
 
 // ==========================
@@ -529,19 +453,19 @@ const cursor = e.target.result;
 
 if (!cursor) {
 
-    select.innerHTML = '<option value="">すべて</option>';
+select.innerHTML = '<option value="">すべて</option>';
 
-    subjects.forEach(subject => {
-        const option = document.createElement("option");
-        option.value = subject;
-        option.textContent = subject;
-        select.appendChild(option);
-    });
+subjects.forEach(subject => {
+const option = document.createElement("option");
+option.value = subject;
+option.textContent = subject;
+select.appendChild(option);
+});
 
-    return;
+return;
 }
 
-subjects.add(cursor.value.subject);
+subjects.add(cursor.value.category);
 cursor.continue();
 };
 }
@@ -569,11 +493,11 @@ const li = document.createElement("li");
 
 // 優先度ごとの色分け
 if (Number(m.priority) === 1) {
-    li.classList.add("weak");
+li.classList.add("weak");
 } else if (Number(m.priority) === 2) {
-    li.classList.add("normal");
+li.classList.add("normal");
 } else {
-    li.classList.add("strong");
+li.classList.add("strong");
 }
 
 
@@ -581,7 +505,7 @@ li.classList.add("weak-item");
 
 const textSpan = document.createElement("span");
 textSpan.textContent =
-    `【${priorityLabel(m.priority)}】${m.subject}：${m.content}`;
+`【${priorityLabel(m.priority)}】${m.subject}：${m.content}`;
 
 const btn = document.createElement("button");
 btn.textContent = "削除";
@@ -598,104 +522,263 @@ cursor.continue();
 }
 
 
-// ==========================
-// 午後分野別 平均理解度（リスト表示）
-// ==========================
-function calculateAfternoonFieldAverage(records) {
-
-const totals = {};
-
-records.forEach(r => {
-if (r.studyType !== "afternoon") return;
-if (!r.field) return;
-
-const key = `${r.subject}｜${r.field}`;
-
-if (!totals[key]) {
-    totals[key] = { sum: 0, count: 0 };
-}
-
-totals[key].sum += r.level;
-totals[key].count++;
-});
-
-displayAfternoonFieldAverage(totals);
-}
-
-
-// ==========================
-// 午後分野別 平均理解度（リスト表示）
-// ==========================
-function displayAfternoonFieldAverage(data) {
-
-const ul = document.getElementById("afternoonFieldAverage");
-if (!ul) return;
-
-ul.innerHTML = "";
-
-Object.keys(data).forEach(key => {
-
-const avg = data[key].sum / data[key].count;
-
-const li = document.createElement("li");
-li.textContent = `${key}：平均理解度 ${avg.toFixed(2)}`;
-
-if (avg < 2.5) li.classList.add("avg-weak");
-else if (avg < 3.5) li.classList.add("avg-normal");
-else li.classList.add("avg-strong");
-
-ul.appendChild(li);
-});
-}
-
-
 function showToast(message, type = "success") {
 
-    const toast = document.getElementById("toast");
-    if (!toast) return;
+const toast = document.getElementById("toast");
+if (!toast) return;
 
-    toast.className = `toast show ${type}`;
-    toast.textContent = message;
+toast.className = `toast show ${type}`;
+toast.textContent = message;
 
-    setTimeout(() => {
-        toast.className = "toast";
-    }, 2000);
+setTimeout(() => {
+toast.className = "toast";
+}, 2000);
 }
 
 
 function deleteWeakPoint(id) {
 
-    const tx = db.transaction("weak_points", "readonly");
-    const store = tx.objectStore("weak_points");
+const tx = db.transaction("weak_points", "readonly");
+const store = tx.objectStore("weak_points");
 
-    const req = store.get(id);
+const req = store.get(id);
 
-    req.onsuccess = () => {
+req.onsuccess = () => {
 
-        const m = req.result;
-        if (!m) return;
+const m = req.result;
+if (!m) return;
 
-        const message =
-            `【${priorityLabel(m.priority)}】${m.subject}：${m.content}\nを削除しますか？`;
+const message =
+`【${priorityLabel(m.priority)}】${m.subject}：${m.content}\nを削除しますか？`;
 
-        const ok = confirm(message);
-        if (!ok) return;
+const ok = confirm(message);
+if (!ok) return;
 
-        const deleteTx = db.transaction("weak_points", "readwrite");
-        deleteTx.objectStore("weak_points").delete(id);
+const deleteTx = db.transaction("weak_points", "readwrite");
+deleteTx.objectStore("weak_points").delete(id);
 
-        deleteTx.oncomplete = () => {
-            displayWeakPoints();
-            showToast("苦手メモを削除しました");
-        };
-    };
+deleteTx.oncomplete = () => {
+displayWeakPoints();
+showToast("苦手メモを削除しました");
+};
+};
 }
 
 
 function priorityLabel(priority) {
-    return {
-        1: "高",
-        2: "中",
-        3: "低"
-    }[Number(priority)] || "";
+return {
+1: "高",
+2: "中",
+3: "低"
+}[Number(priority)] || "";
+}
+
+
+
+const sectionOptions = {
+FE: [{value:"AM",text:"午前"},{value:"PM",text:"午後"}],
+AP: [{value:"AM",text:"午前"},{value:"PM",text:"午後"}],
+SC: [
+{value:"AM1",text:"午前Ⅰ"},
+{value:"AM2",text:"午前Ⅱ"},
+{value:"PM",text:"午後"}
+],
+ADV: [
+{value:"AM1",text:"午前Ⅰ"},
+{value:"AM2",text:"午前Ⅱ"},
+{value:"PM1",text:"午後Ⅰ"},
+{value:"PM2",text:"午後Ⅱ（論文）"}
+]
+};
+
+const majorCategories = [
+"テクノロジ系",
+"マネジメント系",
+"ストラテジ系"
+];
+
+const apAfternoonSubjects = [
+"情報セキュリティ",
+"経営戦略",
+"プログラミング",
+"システムアーキテクチャ",
+"ネットワーク",
+"データベース",
+"組込みシステム開発",
+"情報システム開発",
+"プロジェクトマネジメント",
+"サービスマネジメント",
+"システム監査"
+];
+
+const examSelect = document.getElementById("examType");
+const categorySelect = document.getElementById("category");
+const sectionSelect = document.getElementById("section");
+
+examSelect.addEventListener("change", function () {
+
+const exam = this.value;
+
+sectionSelect.innerHTML = '<option value="">選択してください</option>';
+categorySelect.innerHTML = '<option value="">選択してください</option>';
+
+const sections = sectionOptions[exam] || [];
+
+sections.forEach(sec => {
+const op = document.createElement("option");
+op.value = sec.value;
+op.textContent = sec.text;
+sectionSelect.appendChild(op);
+});
+
+});
+
+
+function updateSubjects() {
+
+const exam = examSelect.value;
+const section = sectionSelect.value;
+
+categorySelect.innerHTML = '<option value="">選択してください</option>';
+
+if (!exam || !section) return;
+
+
+// ===== FE =====
+if (exam === "FE") {
+
+majorCategories.forEach(cat => {
+const op = document.createElement("option");
+op.value = cat;
+op.textContent = cat;
+categorySelect.appendChild(op);
+});
+
+}
+
+
+// ===== AP =====
+if (exam === "AP") {
+
+// 午前（AM）
+if (section === "AM") {
+
+majorCategories.forEach(cat => {
+const op = document.createElement("option");
+op.value = cat;
+op.textContent = cat;
+categorySelect.appendChild(op);
+});
+
+}
+
+// 午後（PM）
+if (section === "PM") {
+
+apAfternoonSubjects.forEach(sub => {
+const op = document.createElement("option");
+op.value = sub;
+op.textContent = sub;
+categorySelect.appendChild(op);
+});
+
+}
+
+}
+
+}
+
+
+sectionSelect.addEventListener("change", updateSubjects);
+examSelect.addEventListener("change", updateSubjects);
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const studyTypeSelect = document.getElementById("studyType");
+    const amountFields = document.querySelectorAll(".amount-field");
+
+    if (!studyTypeSelect) return;
+
+    studyTypeSelect.addEventListener("change", function () {
+
+        const selected = this.value;
+
+        amountFields.forEach(field => {
+            field.style.display = "none";
+        });
+
+        if (!selected) return;
+
+        amountFields.forEach(field => {
+            if (
+                field.dataset.type === selected ||
+                (selected === "morning" && field.dataset.type === "correct") ||
+                (selected === "afternoon" && field.dataset.type === "correct")
+            ) {
+                field.style.display = "block";
+            }
+        });
+
+    });
+
+});
+
+
+function loadForEdit(record) {
+
+
+    editingId = record.id;
+
+    document.getElementById("examType").value = record.examType;
+
+    updateSubjects();
+    document.getElementById("section").value = record.section;
+
+    updateSubjects();
+    document.getElementById("category").value = record.category;
+
+    document.getElementById("studyType").value = record.studyType;
+    document.getElementById("content").value = record.content;
+    document.getElementById("level").value = record.understanding;
+    document.getElementById("date").value = record.studyDate;
+
+    if (record.studyType === "morning") {
+        document.getElementById("amountMorning").value = record.problems;
+        document.getElementById("correctCount").value = record.correct;
+    }
+
+    if (record.studyType === "afternoon") {
+        document.getElementById("amountAfternoon").value = record.problems;
+        document.getElementById("correctCount").value = record.correct;
+    }
+
+    if (record.studyType === "book") {
+        document.getElementById("amountBook").value = record.amount;
+    }
+
+    if (record.studyType === "review") {
+        document.getElementById("amountReview").value = record.amount;
+    }
+
+    if (record.studyType === "mock") {
+        document.getElementById("amountMock").value = record.amount;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    document.getElementById("submitBtn").textContent = "更新";
+    document.getElementById("submitBtn").classList.add("edit-mode");
+
+}
+
+
+function showRegister() {
+    document.getElementById("registerView").style.display = "block";
+    document.getElementById("logsView").style.display = "none";
+}
+
+function showLogs() {
+    document.getElementById("registerView").style.display = "none";
+    document.getElementById("logsView").style.display = "block";
 }

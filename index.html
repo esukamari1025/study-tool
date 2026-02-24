@@ -9,22 +9,53 @@
 
 <h1>学習記録管理</h1>
 
+<div class="tabs">
+    <button onclick="showRegister()">登録</button>
+    <button onclick="showLogs()">記録一覧</button>
+</div>
+
+<div id="registerView">
+<div class="section">
 <h2>学習記録の登録</h2>
 <form id="studyForm">
+
+<label>
+試験種別：
+<select id="examType" required>
+    <option value="" disabled selected>選択してください</option>
+    <option value="FE">基本情報</option>
+    <option value="AP">応用情報</option>
+    <option value="SC">情報処理安全確保支援士</option>
+    <option value="ADV">高度・論文系</option>
+</select>
+</label><br>
+
+
 <label>
 学習日：
 <input type="date" id="date" required>
 </label><br>
 
 <label>
-科目：
-<input type="text" id="subject" required>
-</label><br>
+    試験区分：
+    <select id="section" required>
+        <option value="">試験種別を選択してください</option>
+    </select>
+    </label><br>
 
+<div id="evaluationArea" style="display:none;">
 <label>
-学習内容：
-<input type="text" id="content" required>
-</label><br>
+論文評価：
+<select id="evaluation">
+<option value="" disabled selected>選択してください</option>
+<option value="A">A（合格）</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+</select>
+</label>
+</div>
+
 
 <label>
 学習区分：
@@ -36,16 +67,35 @@
 <option value="review">復習</option>
 <option value="mock">模試</option>
 </select>
-</label>
+</label><br>
 
 <div id="studyAmountArea">
 
+<label id="categoryArea">
+    大分類：
+    <select id="category" required>
+        <option value="">試験種別を選択してください</option>
+    </select>
+    </label><br>
+
+
+
+<label>
+学習内容：
+<input type="text" id="content" required>
+</label><br>
+
+
 <div class="amount-field" data-type="morning">
-問題数：<input type="number" id="amountMorning">
+問題数：<input type="number" id="amountMorning" min="0">
 </div>
 
 <div class="amount-field" data-type="afternoon">
 設問数：<input type="number" id="amountAfternoon">
+</div>
+
+<div class="amount-field" data-type="correct">
+    正答数：<input type="number" id="correctCount">
 </div>
 
 <div class="amount-field" data-type="book">
@@ -64,106 +114,128 @@
 
 <div id="afternoonExtra" style="display:none;">
 <label>
-    午後分野：
-    <select id="afternoonField">
-    <option value="" disabled selected>選択してください</option>
-    <option value="情報セキュリティ">情報セキュリティ</option>
-    <option value="経営戦略">経営戦略</option>
-    <option value="プログラミング">プログラミング</option>
-    <option value="システムアーキテクチャ">システムアーキテクチャ</option>
-    <option value="ネットワーク">ネットワーク</option>
-    <option value="データベース">データベース</option>
-    <option value="組み込みシステム開発">組み込みシステム開発</option>
-    <option value="情報システム開発">情報システム開発</option>
-    <option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
-    <option value="サービスマネジメント">サービスマネジメント</option>
-    <option value="システム監査">システム監査</option>
-    </select>
+午後分野：
+<select id="afternoonField">
+<option value="" disabled selected>選択してください</option>
+<option value="情報セキュリティ">情報セキュリティ</option>
+<option value="経営戦略">経営戦略</option>
+<option value="プログラミング">プログラミング</option>
+<option value="システムアーキテクチャ">システムアーキテクチャ</option>
+<option value="ネットワーク">ネットワーク</option>
+<option value="データベース">データベース</option>
+<option value="組み込みシステム開発">組み込みシステム開発</option>
+<option value="情報システム開発">情報システム開発</option>
+<option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
+<option value="サービスマネジメント">サービスマネジメント</option>
+<option value="システム監査">システム監査</option>
+</select>
 </label>
 </div>
 
-
-
 <label>
 理解度（1〜5）：
-<input type="number" id="level" min="1" max="5" required>
+<select id="level" required>
+<option value="" disabled selected>選択してください</option>
+<option value="1">1（低い）</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5（高い）</option>
+</select>
 </label><br>
 
-<button type="submit">登録</button>
+<button type="submit" id="submitBtn">登録</button>
 </form>
+</div>
+</div>
 
-<h3>午前CSV取込</h3>
-<input type="file" id="morningCsvInput" accept=".csv">
+<div id="logsView" style="display: none;">
+<div class="section">
+<h2>学習記録一覧</h2>
+<div class="filter-area">
 
 <label>
-    科目で絞り込み：
-    <select id="filterSubject">
+資格で絞り込み
+<select id="filterExam">
     <option value="">すべて</option>
-    </select>
-    </label>
+    <option value="FE">基本情報</option>
+    <option value="AP">応用情報</option>
+    <option value="SC">安全確保支援士</option>
+    <option value="ADV">高度</option>
+</select>
+</label>
 
-    <label>
-    学習区分で絞り込み：
-    <select id="filterStudyType">
+<label>
+科目で絞り込み：
+<select id="filterSubject">
+<option value="">すべて</option>
+</select>
+</label>
+
+
+<label>
+    試験区分で絞り込み：
+    <select id="filterSection">
     <option value="">すべて</option>
-    <option value="morning">午前問題</option>
-    <option value="afternoon">午後問題</option>
-    <option value="book">参考書</option>
-    <option value="review">復習</option>
-    <option value="mock">模試</option>
+    <option value="AM">午前</option>
+    <option value="PM">午後</option>
     </select>
-    </label>
-
-    <label>
-    午後分野で絞り込み：
-    <select id="filterField">
-    <option value="">すべて</option>
-    <option value="情報セキュリティ">情報セキュリティ</option>
-    <option value="経営戦略">経営戦略</option>
-    <option value="プログラミング">プログラミング</option>
-    <option value="システムアーキテクチャ">システムアーキテクチャ</option>
-    <option value="ネットワーク">ネットワーク</option>
-    <option value="データベース">データベース</option>
-    <option value="組み込みシステム開発">組み込みシステム開発</option>
-    <option value="情報システム開発">情報システム開発</option>
-    <option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
-    <option value="サービスマネジメント">サービスマネジメント</option>
-    <option value="システム監査">システム監査</option>
-    </select>
-    </label>
+</label>
 
 
-<h2>学習記録一覧</h2>
+<label>
+学習区分で絞り込み：
+<select id="filterStudyType">
+<option value="">すべて</option>
+<option value="morning">午前問題</option>
+<option value="afternoon">午後問題</option>
+<option value="book">参考書</option>
+<option value="review">復習</option>
+<option value="mock">模試</option>
+</select>
+</label>
+
+</div>
+
+<p class="note">※理解度に応じて色分けしています</p>
 <table border="1">
 <thead>
 <tr>
-<th>日付</th>
-<th>科目</th>
-<th>内容</th>
-<th>区分</th>
-<th>学習量</th>
-<th>理解度</th>
-<th>操作</th>
+    <th>資格</th>
+    <th>日付</th>
+    <th>科目</th>
+    <th>内容</th>
+    <th>試験区分</th>
+    <th>学習区分</th>
+    <th>学習量</th>
+    <th>正答率</th>
+    <th>判定</th>
+    <th>理解度</th>
+    <th>操作</th>
 </tr>
 </thead>
 <tbody id="logList">
 </tbody>
 </table>
+</div>
 
-<h3>科目別 平均理解度</h3>
+<div class="section">
+
+<h3>午前・午後 平均正答率</h3>
+<p class="note">※午前問題・午後問題の平均正答率</p>
+<p class="note">※理解度や優先度に応じて色分けしています</p>
 <ul id="subjectAverage"></ul>
-
-<h3>科目別 平均理解度（グラフ）</h3>
 <canvas id="avgChart" width="400" height="200"></canvas>
 
-<section>
-    <h3>午後問題 分野別 平均理解度</h3>
-    <ul id="afternoonFieldAverage"></ul>
-</section>
 
-<h3>午後問題 分野別 平均理解度（グラフ）</h3>
+<h3>インプット学習量</h3>
+<p class="note">※参考書・復習の累計</p>
+<ul id="afternoonFieldAverage"></ul>
+
 <canvas id="afternoonChart" width="400" height="200"></canvas>
+</div>
 
+<div class="section">
 <h3>苦手メモ</h3>
 
 <form id="weakForm">
@@ -192,7 +264,7 @@
 <ul id="weakList"></ul>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="main.js"></script>
+<script src="main.js" defer></script>
 
 <div id="toast" class="toast"></div>
 
