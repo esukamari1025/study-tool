@@ -739,7 +739,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function loadForEdit(record) {
 
-    showRegister(); // ← まずタブ切替
+    showRegister();
 
     editingId = record.id;
 
