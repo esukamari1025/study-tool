@@ -698,78 +698,77 @@ document.addEventListener("DOMContentLoaded", function () {
     const studyTypeSelect = document.getElementById("studyType");
     const amountFields = document.querySelectorAll(".amount-field");
 
-    if (!studyTypeSelect) return;
+    if (studyTypeSelect) {
+        studyTypeSelect.addEventListener("change", function () {
 
-    studyTypeSelect.addEventListener("change", function () {
+            const selected = this.value;
 
-        const selected = this.value;
+            amountFields.forEach(field => {
+                field.style.display = "none";
+            });
 
-        amountFields.forEach(field => {
-            field.style.display = "none";
+            if (!selected) return;
+
+            amountFields.forEach(field => {
+                if (
+                    field.dataset.type === selected ||
+                    (selected === "morning" && field.dataset.type === "correct") ||
+                    (selected === "afternoon" && field.dataset.type === "correct")
+                ) {
+                    field.style.display = "block";
+                }
+            });
+
         });
+    }
 
-        if (!selected) return;
-
-        amountFields.forEach(field => {
-            if (
-                field.dataset.type === selected ||
-                (selected === "morning" && field.dataset.type === "correct") ||
-                (selected === "afternoon" && field.dataset.type === "correct")
-            ) {
-                field.style.display = "block";
-            }
-        });
-
-    });
+    const cancelBtn = document.getElementById("cancelEdit");
+    if (cancelBtn) {
+        cancelBtn.onclick = function () {
+            editingId = null;
+            document.getElementById("studyForm").reset();
+            document.getElementById("submitBtn").textContent = "登録";
+            document.getElementById("submitBtn").classList.remove("edit-mode");
+            this.style.display = "none";
+        };
+    }
 
 });
 
 
 function loadForEdit(record) {
 
+    showRegister(); // ← まずタブ切替
 
     editingId = record.id;
 
+    // ① examセット
     document.getElementById("examType").value = record.examType;
 
-    updateSubjects();
+    // ② section optionを生成
+    const event = new Event("change");
+    document.getElementById("examType").dispatchEvent(event);
+
+    // ③ sectionセット
     document.getElementById("section").value = record.section;
 
-    updateSubjects();
+    // ④ category option生成
+    document.getElementById("section").dispatchEvent(new Event("change"));
+
+    // ⑤ categoryセット
     document.getElementById("category").value = record.category;
 
+    // ⑥ 他項目
     document.getElementById("studyType").value = record.studyType;
     document.getElementById("content").value = record.content;
     document.getElementById("level").value = record.understanding;
     document.getElementById("date").value = record.studyDate;
 
-    if (record.studyType === "morning") {
-        document.getElementById("amountMorning").value = record.problems;
-        document.getElementById("correctCount").value = record.correct;
-    }
-
-    if (record.studyType === "afternoon") {
-        document.getElementById("amountAfternoon").value = record.problems;
-        document.getElementById("correctCount").value = record.correct;
-    }
-
-    if (record.studyType === "book") {
-        document.getElementById("amountBook").value = record.amount;
-    }
-
-    if (record.studyType === "review") {
-        document.getElementById("amountReview").value = record.amount;
-    }
-
-    if (record.studyType === "mock") {
-        document.getElementById("amountMock").value = record.amount;
-    }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
     document.getElementById("submitBtn").textContent = "更新";
     document.getElementById("submitBtn").classList.add("edit-mode");
 
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("cancelEdit").style.display = "inline-block";
 }
 
 
