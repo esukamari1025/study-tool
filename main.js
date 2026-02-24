@@ -730,6 +730,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("submitBtn").textContent = "登録";
             document.getElementById("submitBtn").classList.remove("edit-mode");
             this.style.display = "none";
+            showLogs();
         };
     }
 
