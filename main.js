@@ -66,16 +66,23 @@ let correct = 0;
 let amount = 0;
 
 if (studyType === "book") {
-    amount = Number(document.getElementById("amountBook").value) || 0;
+amount = Number(document.getElementById("amountBook").value) || 0;
 }
 else if (studyType === "review") {
-    amount = Number(document.getElementById("amountReview").value) || 0;
+amount = Number(document.getElementById("amountReview").value) || 0;
 }
-else if (studyType === "mock") {
-    amount = Number(document.getElementById("amountMock").value) || 0;
+else if (studyType === "mock-am") {
+problems = Number(document.getElementById("mockTotal").value) || 0;
+correct = Number(document.getElementById("mockCorrect").value) || 0;
+amount = problems;
+}
+else if (studyType === "mock-pm") {
+problems = Number(document.getElementById("mockTotal").value) || 0;
+correct = Number(document.getElementById("mockCorrect").value) || 0;
+amount = problems;
 }
 else {
-    amount = problems;
+amount = problems;
 }
 
 if (studyType === "morning") {
@@ -95,14 +102,21 @@ const passLine = 0.6;
 let result = "-";
 
 if (problems > 0) {
-    result = accuracy >= passLine ? "pass" : "fail";
+result = accuracy >= passLine ? "pass" : "fail";
 }
 
+let categoryValue = document.getElementById("category").value || "";
+
+if (studyType === "mock-am") {
+categoryValue = "模試(午前)";
+} else if (studyType === "mock-pm") {
+categoryValue = "模試(午後)";
+}
 
 const record = {
 examType: document.getElementById("examType").value,
 section: document.getElementById("section").value,
-category: document.getElementById("category").value,
+category: categoryValue,
 studyType: studyType,
 content: document.getElementById("content").value,
 amount: amount,
@@ -117,10 +131,10 @@ evaluation: document.getElementById("evaluation")?.value || ""
 
 const tx = db.transaction("study_logs", "readwrite");
 if (editingId) {
-    record.id = editingId;
-    tx.objectStore("study_logs").put(record);
+record.id = editingId;
+tx.objectStore("study_logs").put(record);
 } else {
-    tx.objectStore("study_logs").add(record);
+tx.objectStore("study_logs").add(record);
 }
 
 
@@ -129,8 +143,8 @@ e.target.reset();
 document.getElementById("date").valueAsDate = new Date();
 displayLogs();
 showToast(
-    editingId ? "学習記録を更新しました" : "学習記録を登録しました",
-    "success"
+editingId ? "学習記録を更新しました" : "学習記録を登録しました",
+"success"
 );
 
 editingId = null;
@@ -138,6 +152,8 @@ editingId = null;
 const btn = document.getElementById("submitBtn");
 btn.textContent = "登録";
 btn.classList.remove("edit-mode");
+
+showLogs();
 };
 });
 
@@ -182,13 +198,13 @@ document.getElementById("filterExam")
 ?.addEventListener("change", applyFilters);
 
 function applyFilters() {
-    const subject = document.getElementById("filterSubject").value;
-    const section = document.getElementById("filterSection").value;
-    const studyType = document.getElementById("filterStudyType").value;
-    const exam = document.getElementById("filterExam").value;
+const subject = document.getElementById("filterSubject").value;
+const section = document.getElementById("filterSection").value;
+const studyType = document.getElementById("filterStudyType").value;
+const exam = document.getElementById("filterExam").value;
 
-    displayLogs(subject, section, studyType,exam);
-    }
+displayLogs(subject, section, studyType,exam);
+}
 
 
 
@@ -243,12 +259,13 @@ tr.innerHTML = `
 <td>${r.content}</td>
 <td>${r.section}</td>
 <td>${{
-    morning:"午前問題",
-    afternoon:"午後問題",
-    book:"参考書",
-    review:"復習",
-    mock:"模試"
-}[r.studyType]}</td>
+morning: "午前問題",
+afternoon: "午後問題",
+"mock-am": "模試(午前)",
+"mock-pm": "模試(午後)",
+book: "参考書",
+review: "復習"
+}[r.studyType] || "-"}</td>
 <td>${r.amount || "-"}</td>
 <td>${accuracyText}</td>
 <td class="${resultClass}">${result}</td>
@@ -272,7 +289,8 @@ tr.appendChild(td);
 tbody.appendChild(tr);
 });
 
-updateExamChart(records);
+updateNormalChart(records);
+updateMockChart(records);
 updateStudyVolumeChart(records);
 
 return;
@@ -282,24 +300,24 @@ return;
 const r = cursor.value;
 
 if (exam && r.examType !== exam) {
-    cursor.continue();
-    return;
+cursor.continue();
+return;
 }
 
 
 if (subject && r.category !== subject) {
-    cursor.continue();
-    return;
+cursor.continue();
+return;
 }
 
 if (section && r.section !== section) {
-    cursor.continue();
-    return;
+cursor.continue();
+return;
 }
 
 if (studyType && r.studyType !== studyType) {
-    cursor.continue();
-    return;
+cursor.continue();
+return;
 }
 
 
@@ -336,103 +354,144 @@ applyFilters();
 }
 
 
-function updateExamChart(records) {
+function updateNormalChart(records) {
 
-    const ctx = document.getElementById("avgChart").getContext("2d");
+const ctx = document.getElementById("normalChart").getContext("2d");
 
-    if (window.subjectChart instanceof Chart) {
-        window.subjectChart.destroy();
+if (window.normalChartInstance instanceof Chart) {
+    window.normalChartInstance.destroy();
+}
+
+let morningTotal = 0;
+let morningCount = 0;
+
+let afternoonTotal = 0;
+let afternoonCount = 0;
+
+records.forEach(r => {
+
+    if (r.studyType === "morning" && r.problems > 0) {
+        morningTotal += r.accuracy;
+        morningCount++;
     }
 
-    let morningTotal = 0;
-    let morningCount = 0;
+    if (r.studyType === "afternoon" && r.problems > 0) {
+        afternoonTotal += r.accuracy;
+        afternoonCount++;
+    }
+});
 
-    let afternoonTotal = 0;
-    let afternoonCount = 0;
+const morningAvg = morningCount ? (morningTotal / morningCount) * 100 : 0;
+const afternoonAvg = afternoonCount ? (afternoonTotal / afternoonCount) * 100 : 0;
 
-    let mockTotal = 0;
-    let mockCount = 0;
+window.normalChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+        labels: ["午前", "午後"],
+        datasets: [{
+            label: "平均正答率(%)",
+            data: [
+                morningAvg.toFixed(1),
+                afternoonAvg.toFixed(1)
+            ]
+        }]
+    },
+    options: {
+        scales: {
+            y: { min: 0, max: 100 }
+        }
+    }
+});
+}
+
+function updateMockChart(records) {
+
+const ctx = document.getElementById("mockChart").getContext("2d");
+
+if (window.mockChartInstance instanceof Chart) {
+    window.mockChartInstance.destroy();
+}
+
+let mockAMTotal = 0;
+let mockAMCount = 0;
+
+let mockPMTotal = 0;
+let mockPMCount = 0;
+
+records.forEach(r => {
+
+    if (r.studyType === "mock-am" && r.problems > 0) {
+        mockAMTotal += r.accuracy;
+        mockAMCount++;
+    }
+
+    if (r.studyType === "mock-pm" && r.problems > 0) {
+        mockPMTotal += r.accuracy;
+        mockPMCount++;
+    }
+});
+
+const mockAMAvg = mockAMCount ? (mockAMTotal / mockAMCount) * 100 : 0;
+const mockPMAvg = mockPMCount ? (mockPMTotal / mockPMCount) * 100 : 0;
+
+window.mockChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+        labels: ["模試午前", "模試午後"],
+        datasets: [{
+            label: "平均正答率(%)",
+            data: [
+                mockAMAvg.toFixed(1),
+                mockPMAvg.toFixed(1)
+            ]
+        }]
+    },
+    options: {
+        scales: {
+            y: { min: 0, max: 100 }
+        }
+    }
+});
+}
+
+
+function updateStudyVolumeChart(records) {
+
+    const ctx = document.getElementById("afternoonChart").getContext("2d");
+
+    if (window.volumeChart instanceof Chart) {
+        window.volumeChart.destroy();
+    }
+
+    let bookTotal = 0;
+    let reviewTotal = 0;
 
     records.forEach(r => {
-        if (r.studyType === "morning" && r.problems > 0) {
-            morningTotal += r.accuracy;
-            morningCount++;
+        if (r.studyType === "book") {
+            bookTotal += r.amount || 0;
+        }
+        if (r.studyType === "review") {
+            reviewTotal += r.amount || 0;
         }
 
-        if (r.studyType === "afternoon" && r.problems > 0) {
-            afternoonTotal += r.accuracy;
-            afternoonCount++;
-        }
-
-        if (r.studyType === "mock" && r.amount > 0) {
-            mockTotal += r.accuracy;
-            mockCount++;
-        }
     });
 
-    const morningAvg = morningCount ? (morningTotal / morningCount) * 100 : 0;
-    const afternoonAvg = afternoonCount ? (afternoonTotal / afternoonCount) * 100 : 0;
-    const mockAvg = mockCount ? (mockTotal / mockCount) : 0;
-
-    window.subjectChart = new Chart(ctx, {
+    window.volumeChart = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: ["午前", "午後", "模試"],
+            labels: ["参考書(ページ)", "復習(分)"],
             datasets: [{
-                label: "平均正答率(%)",
-                data: [
-                    morningAvg.toFixed(1),
-                    afternoonAvg.toFixed(1),
-                    mockAvg.toFixed(1)
-                ]
+                label: "累計学習量",
+                data: [bookTotal, reviewTotal]
             }]
         },
         options: {
             scales: {
-                y: { min: 0, max: 100 }
+                y: { beginAtZero: true }
             }
         }
     });
 }
-
-
-    function updateStudyVolumeChart(records) {
-
-        const ctx = document.getElementById("afternoonChart").getContext("2d");
-    
-        if (window.volumeChart instanceof Chart) {
-            window.volumeChart.destroy();
-        }
-    
-        let bookTotal = 0;
-        let reviewTotal = 0;
-    
-        records.forEach(r => {
-            if (r.studyType === "book") {
-                bookTotal += r.amount || 0;
-            }
-            if (r.studyType === "review") {
-                reviewTotal += r.amount || 0;
-            }
-
-        });
-    
-        window.volumeChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: ["参考書(ページ)", "復習(分)"],
-                datasets: [{
-                    label: "累計学習量",
-                    data: [bookTotal, reviewTotal]
-                }]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
 
 
 
@@ -465,7 +524,9 @@ select.appendChild(option);
 return;
 }
 
+if (cursor.value.category) {
 subjects.add(cursor.value.category);
+}
 cursor.continue();
 };
 }
@@ -611,6 +672,33 @@ const apAfternoonSubjects = [
 "システム監査"
 ];
 
+const scAm1Categories = [
+"テクノロジ系",
+"マネジメント系",
+"ストラテジ系"
+];
+
+const scAm2Categories = [
+"暗号",
+"認証・PKI",
+"ネットワークセキュリティ",
+"マルウェア・攻撃手法",
+"脆弱性・診断",
+"法務・ガイドライン",
+"リスク管理"
+];
+
+const scPmCategories = [
+"暗号設計",
+"認証設計",
+"ログ解析",
+"インシデント対応",
+"セキュア設計",
+"クラウドセキュリティ",
+"Webセキュリティ"
+];
+
+
 const examSelect = document.getElementById("examType");
 const categorySelect = document.getElementById("category");
 const sectionSelect = document.getElementById("section");
@@ -640,6 +728,8 @@ const exam = examSelect.value;
 const section = sectionSelect.value;
 
 categorySelect.innerHTML = '<option value="">選択してください</option>';
+
+document.getElementById("evaluationArea").style.display = "none";
 
 if (!exam || !section) return;
 
@@ -686,6 +776,74 @@ categorySelect.appendChild(op);
 
 }
 
+
+// ===== SC（支援士） =====
+if (exam === "SC") {
+
+if (section === "AM1") {
+    scAm1Categories.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat;
+        op.textContent = cat;
+        categorySelect.appendChild(op);
+    });
+}
+
+if (section === "AM2") {
+    scAm2Categories.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat;
+        op.textContent = cat;
+        categorySelect.appendChild(op);
+    });
+}
+
+if (section === "PM") {
+    scPmCategories.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat;
+        op.textContent = cat;
+        categorySelect.appendChild(op);
+    });
+}
+}
+
+
+// ===== ADV（高度種） =====
+if (exam === "ADV") {
+
+// 午前Ⅰ・Ⅱ → 大分類
+if (section === "AM1" || section === "AM2") {
+    majorCategories.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat;
+        op.textContent = cat;
+        categorySelect.appendChild(op);
+    });
+}
+
+// 午後Ⅰ → 分野選択
+if (section === "PM1") {
+    apAfternoonSubjects.forEach(sub => {
+        const op = document.createElement("option");
+        op.value = sub;
+        op.textContent = sub;
+        categorySelect.appendChild(op);
+    });
+}
+
+// 午後Ⅱ（論文） → 分野不要
+if (section === "PM2") {
+    const op = document.createElement("option");
+    op.value = "論文";
+    op.textContent = "論文";
+    categorySelect.appendChild(op);
+
+    // 論文評価を表示
+    document.getElementById("evaluationArea").style.display = "block";
+}
+}
+
 }
 
 
@@ -695,90 +853,92 @@ examSelect.addEventListener("change", updateSubjects);
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const studyTypeSelect = document.getElementById("studyType");
-    const amountFields = document.querySelectorAll(".amount-field");
+const studyTypeSelect = document.getElementById("studyType");
+const amountFields = document.querySelectorAll(".amount-field");
 
-    if (studyTypeSelect) {
-        studyTypeSelect.addEventListener("change", function () {
+if (studyTypeSelect) {
+    studyTypeSelect.addEventListener("change", function () {
 
-            const selected = this.value;
+        const selected = this.value;
+        const categoryArea = document.getElementById("categoryArea");
+        const categorySelect = document.getElementById("category");
 
-            amountFields.forEach(field => {
-                field.style.display = "none";
-            });
+        if (categoryArea && categorySelect) {
 
-            if (!selected) return;
+            if (selected === "mock-am" || selected === "mock-pm") {
+                categoryArea.style.display = "none";
+                categorySelect.required = false;
+            } else {
+                categoryArea.style.display = "block";
+                categorySelect.required = true;
+            }
 
-            amountFields.forEach(field => {
-                if (
-                    field.dataset.type === selected ||
-                    (selected === "morning" && field.dataset.type === "correct") ||
-                    (selected === "afternoon" && field.dataset.type === "correct")
-                ) {
-                    field.style.display = "block";
-                }
-            });
+        }
 
+        amountFields.forEach(field => {
+            field.style.display = "none";
         });
-    }
 
-    const cancelBtn = document.getElementById("cancelEdit");
-    if (cancelBtn) {
-        cancelBtn.onclick = function () {
-            editingId = null;
-            document.getElementById("studyForm").reset();
-            document.getElementById("submitBtn").textContent = "登録";
-            document.getElementById("submitBtn").classList.remove("edit-mode");
-            this.style.display = "none";
-            showLogs();
-        };
-    }
+        if (!selected) return;
+
+        amountFields.forEach(field => {
+            if (
+                field.dataset.type === selected ||
+                (selected === "morning" && field.dataset.type === "correct") ||
+                (selected === "afternoon" && field.dataset.type === "correct") ||
+                (selected === "mock" && field.dataset.type === "mock-afternoon")
+            ){
+                field.style.display = "block";
+            }
+        });
+
+    });
+}
 
 });
 
-
 function loadForEdit(record) {
 
-    showRegister();
+showRegister();
 
-    editingId = record.id;
+editingId = record.id;
 
-    // ① examセット
-    document.getElementById("examType").value = record.examType;
+// ① examセット
+document.getElementById("examType").value = record.examType;
 
-    // ② section optionを生成
-    const event = new Event("change");
-    document.getElementById("examType").dispatchEvent(event);
+// ② section optionを生成
+const event = new Event("change");
+document.getElementById("examType").dispatchEvent(event);
 
-    // ③ sectionセット
-    document.getElementById("section").value = record.section;
+// ③ sectionセット
+document.getElementById("section").value = record.section;
 
-    // ④ category option生成
-    document.getElementById("section").dispatchEvent(new Event("change"));
+// ④ category option生成
+document.getElementById("section").dispatchEvent(new Event("change"));
 
-    // ⑤ categoryセット
-    document.getElementById("category").value = record.category;
+// ⑤ categoryセット
+document.getElementById("category").value = record.category;
 
-    // ⑥ 他項目
-    document.getElementById("studyType").value = record.studyType;
-    document.getElementById("content").value = record.content;
-    document.getElementById("level").value = record.understanding;
-    document.getElementById("date").value = record.studyDate;
+// ⑥ 他項目
+document.getElementById("studyType").value = record.studyType;
+document.getElementById("content").value = record.content;
+document.getElementById("level").value = record.understanding;
+document.getElementById("date").value = record.studyDate;
 
-    document.getElementById("submitBtn").textContent = "更新";
-    document.getElementById("submitBtn").classList.add("edit-mode");
+document.getElementById("submitBtn").textContent = "更新";
+document.getElementById("submitBtn").classList.add("edit-mode");
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    document.getElementById("cancelEdit").style.display = "inline-block";
+window.scrollTo({ top: 0, behavior: "smooth" });
+document.getElementById("cancelEdit").style.display = "inline-block";
 }
 
 
 function showRegister() {
-    document.getElementById("registerView").style.display = "block";
-    document.getElementById("logsView").style.display = "none";
+document.getElementById("registerView").style.display = "block";
+document.getElementById("logsView").style.display = "none";
 }
 
 function showLogs() {
-    document.getElementById("registerView").style.display = "none";
-    document.getElementById("logsView").style.display = "block";
+document.getElementById("registerView").style.display = "none";
+document.getElementById("logsView").style.display = "block";
 }
