@@ -698,6 +698,16 @@ const scPmCategories = [
 "Webセキュリティ"
 ];
 
+const advancedCategories = [
+    "ネットワーク",
+    "データベース",
+    "セキュリティ",
+    "システムアーキテクチャ",
+    "プロジェクトマネジメント",
+    "サービスマネジメント",
+    "システム監査"
+];
+
 
 const examSelect = document.getElementById("examType");
 const categorySelect = document.getElementById("category");
@@ -824,7 +834,7 @@ if (section === "AM1" || section === "AM2") {
 
 // 午後Ⅰ → 分野選択
 if (section === "PM1") {
-    apAfternoonSubjects.forEach(sub => {
+    advancedCategories.forEach(sub => {
         const op = document.createElement("option");
         op.value = sub;
         op.textContent = sub;
