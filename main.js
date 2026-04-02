@@ -652,11 +652,7 @@ ADV: [
 ]
 };
 
-const majorCategories = [
-"テクノロジ系",
-"マネジメント系",
-"ストラテジ系"
-];
+
 
 const apAfternoonSubjects = [
 "情報セキュリティ",
@@ -741,36 +737,42 @@ categorySelect.innerHTML = '<option value="">選択してください</option>';
 
 document.getElementById("evaluationArea").style.display = "none";
 
+if (exam === "FE" || (exam === "AP" && section === "AM")) {
+    document.getElementById("categoryArea").style.display = "none";
+} else {
+    document.getElementById("categoryArea").style.display = "block";
+}
+
 if (!exam || !section) return;
 
 
 // ===== FE =====
-if (exam === "FE") {
+// if (exam === "FE") {
 
-majorCategories.forEach(cat => {
-const op = document.createElement("option");
-op.value = cat;
-op.textContent = cat;
-categorySelect.appendChild(op);
-});
+// majorCategories.forEach(cat => {
+// const op = document.createElement("option");
+// op.value = cat;
+// op.textContent = cat;
+// categorySelect.appendChild(op);
+// });
 
-}
+// }
 
 
 // ===== AP =====
 if (exam === "AP") {
 
 // 午前（AM）
-if (section === "AM") {
+// if (section === "AM") {
 
-majorCategories.forEach(cat => {
-const op = document.createElement("option");
-op.value = cat;
-op.textContent = cat;
-categorySelect.appendChild(op);
-});
+// majorCategories.forEach(cat => {
+// const op = document.createElement("option");
+// op.value = cat;
+// op.textContent = cat;
+// categorySelect.appendChild(op);
+// });
 
-}
+// }
 
 // 午後（PM）
 if (section === "PM") {
