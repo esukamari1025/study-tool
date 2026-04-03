@@ -884,7 +884,13 @@ if (studyTypeSelect) {
 
         if (categoryArea && categorySelect) {
 
-            if (selected === "mock-am" || selected === "mock-pm") {
+            if (selected === "mock-am" ||
+                selected === "mock-pm" ||
+                exam === "FE"||
+                section === "AM" ||
+                section === "AM1" ||
+                section === "AM2"
+            ) {
                 categoryArea.style.display = "none";
                 categorySelect.required = false;
             } else {
