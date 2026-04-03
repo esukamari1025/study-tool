@@ -737,7 +737,12 @@ categorySelect.innerHTML = '<option value="">選択してください</option>';
 
 document.getElementById("evaluationArea").style.display = "none";
 
-if (exam === "FE" || (exam === "AP" && section === "AM")) {
+if (
+    exam === "FE" ||
+    section === "AM" ||
+    section === "AM1" ||
+    section === "AM2"
+) {
     document.getElementById("categoryArea").style.display = "none";
 } else {
     document.getElementById("categoryArea").style.display = "block";
