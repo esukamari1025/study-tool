@@ -744,8 +744,10 @@ if (
     section === "AM2"
 ) {
     document.getElementById("categoryArea").style.display = "none";
+    categorySelect.required = false;
 } else {
     document.getElementById("categoryArea").style.display = "block";
+    categorySelect.required = true;
 }
 
 if (!exam || !section) return;
