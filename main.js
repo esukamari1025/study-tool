@@ -19,7 +19,6 @@ if (db.objectStoreNames.contains("study_logs")) {
 db.deleteObjectStore("study_logs");
 }
 
-//テスト
 const studyStore = db.createObjectStore("study_logs", {
 keyPath: "id",
 autoIncrement: true
