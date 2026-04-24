@@ -20,136 +20,33 @@
 <form id="studyForm">
 
 <label>
-試験種別：
-<select id="examType" required>
-    <option value="" disabled selected>選択してください</option>
-    <option value="FE">基本情報</option>
-    <option value="AP">応用情報</option>
-    <option value="SC">情報処理安全確保支援士</option>
-    <option value="ADV">高度・論文系</option>
-</select>
-</label><br>
-
-
-<label>
 学習日：
 <input type="date" id="date" required>
 </label><br>
 
 <label>
-    試験区分：
-    <select id="section" required>
-        <option value="">試験種別を選択してください</option>
-    </select>
-    </label><br>
-
-<div id="evaluationArea" style="display:none;">
-<label>
-論文評価：
-<select id="evaluation">
-<option value="" disabled selected>選択してください</option>
-<option value="A">A（合格）</option>
-<option value="B">B</option>
-<option value="C">C</option>
-<option value="D">D</option>
-</select>
-</label>
-</div>
-
-
-<label>
 学習区分：
 <select id="studyType">
 <option value="" disabled selected>選択してください</option>
-<option value="morning">午前問題</option>
-<option value="afternoon">午後問題</option>
-<option value="book">参考書</option>
+<option value="class">授業</option>
+<option value="self">自主学習</option>
 <option value="review">復習</option>
-<option value="mock-am">模試(午前)</option>
-<option value="mock-pm">模試(午後)</option>
 </select>
 </label><br>
 
-<div id="studyAmountArea">
-
-<label id="categoryArea">
-    大分類：
-    <select id="category">
-        <option value="">試験種別を選択してください</option>
-    </select>
-    </label><br>
-
-
+<label>
+科目：<input type="text" id="subject" required>
+</label>
 
 <label>
 学習内容：
 <input type="text" id="content" required>
 </label><br>
 
-
-<div class="amount-field" data-type="morning">
-問題数：<input type="number" id="amountMorning" min="0">
-</div>
-
-<div class="amount-field" data-type="afternoon">
-設問数：<input type="number" id="amountAfternoon">
-</div>
-
-<div class="amount-field" data-type="correct">
-    正答数：<input type="number" id="correctCount">
-</div>
-
-<div class="amount-field" data-type="book">
-ページ数：<input type="number" id="amountBook">
-</div>
-
-<div class="amount-field" data-type="review">
-時間（分）：<input type="number" id="amountReview">
-</div>
-
-<div class="amount-field" data-type="mock">
-得点：<input type="number" id="amountMock">
-</div>
-
-<div class="amount-field" data-type="mock-am">
-総問題数：<input type="number" id="mockTotal">
-</div>
-
-<div class="amount-field" data-type="mock-am">
-正答数：<input type="number" id="mockCorrect">
-</div>
-
-    <!-- 応用 午後 設問別入力 -->
-<div class="amount-field" data-type="mock-pm">
-    <p>午後（各20点）</p>
-    問1：<input type="number" class="ap-q" min="0" max="20"><br>
-    問2：<input type="number" class="ap-q" min="0" max="20"><br>
-    問3：<input type="number" class="ap-q" min="0" max="20"><br>
-    問4：<input type="number" class="ap-q" min="0" max="20"><br>
-    問5：<input type="number" class="ap-q" min="0" max="20"><br>
-</div>
-
-</div>
-
-<div id="afternoonExtra" style="display:none;">
 <label>
-午後分野：
-<select id="afternoonField">
-<option value="" disabled selected>選択してください</option>
-<option value="情報セキュリティ">情報セキュリティ</option>
-<option value="経営戦略">経営戦略</option>
-<option value="プログラミング">プログラミング</option>
-<option value="システムアーキテクチャ">システムアーキテクチャ</option>
-<option value="ネットワーク">ネットワーク</option>
-<option value="データベース">データベース</option>
-<option value="組み込みシステム開発">組み込みシステム開発</option>
-<option value="情報システム開発">情報システム開発</option>
-<option value="プロジェクトマネジメント">プロジェクトマネジメント</option>
-<option value="サービスマネジメント">サービスマネジメント</option>
-<option value="システム監査">システム監査</option>
-</select>
-</label>
-</div>
+学習時間（分）：
+<input type="number" id="studyTime">
+</label><br>
 
 <label>
 理解度（1〜5）：
@@ -175,43 +72,19 @@
 <div class="filter-area">
 
 <label>
-資格で絞り込み
-<select id="filterExam">
-    <option value="">すべて</option>
-    <option value="FE">基本情報</option>
-    <option value="AP">応用情報</option>
-    <option value="SC">安全確保支援士</option>
-    <option value="ADV">高度</option>
-</select>
-</label>
-
-<label>
 科目で絞り込み：
 <select id="filterSubject">
 <option value="">すべて</option>
 </select>
 </label>
 
-
-<label>
-    試験区分で絞り込み：
-    <select id="filterSection">
-    <option value="">すべて</option>
-    <option value="AM">午前</option>
-    <option value="PM">午後</option>
-    </select>
-</label>
-
-
 <label>
 学習区分で絞り込み：
 <select id="filterStudyType">
 <option value="">すべて</option>
-<option value="morning">午前問題</option>
-<option value="afternoon">午後問題</option>
-<option value="book">参考書</option>
+<option value="class">授業</option>
+<option value="self">自主学習</option>
 <option value="review">復習</option>
-<option value="mock">模試</option>
 </select>
 </label>
 
@@ -221,15 +94,11 @@
 <table border="1">
 <thead>
 <tr>
-    <th>資格</th>
     <th>日付</th>
     <th>科目</th>
     <th>内容</th>
-    <th>試験区分</th>
     <th>学習区分</th>
-    <th>学習量</th>
-    <th>正答率</th>
-    <th>判定</th>
+    <th>学習時間(分)</th>
     <th>理解度</th>
     <th>操作</th>
 </tr>
@@ -241,17 +110,8 @@
 
 <div class="section">
 
-    <h3>通常学習 平均正答率</h3>
-    <p class="note">※午前・午後の平均正答率</p>
-    <canvas id="normalChart" width="400" height="200"></canvas>
-
-    <h3>模試 平均正答率</h3>
-    <p class="note">※模試 午前・午後の平均正答率</p>
-    <canvas id="mockChart" width="400" height="200"></canvas>
-
 <h3>インプット学習量</h3>
-<p class="note">※参考書・復習の累計</p>
-<ul id="afternoonFieldAverage"></ul>
+<ul id="studySummary"></ul>
 
 <canvas id="afternoonChart" width="400" height="200"></canvas>
 </div>

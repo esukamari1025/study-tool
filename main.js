@@ -24,9 +24,7 @@ keyPath: "id",
 autoIncrement: true
 });
 
-studyStore.createIndex("examType", "examType", { unique: false });
-//studyStore.createIndex("subject", "subject", { unique: false });
-studyStore.createIndex("category", "category", { unique: false });
+studyStore.createIndex("subject", "subject", { unique: false });
 studyStore.createIndex("studyDate", "studyDate", { unique: false });
 
 // --- 苦手メモストア ---
@@ -65,35 +63,31 @@ let problems = 0;
 let correct = 0;
 let amount = 0;
 
-if (studyType === "book") {
-amount = Number(document.getElementById("amountBook").value) || 0;
-}
-else if (studyType === "review") {
-amount = Number(document.getElementById("amountReview").value) || 0;
-}
-else if (studyType === "mock-am") {
-problems = Number(document.getElementById("mockTotal").value) || 0;
-correct = Number(document.getElementById("mockCorrect").value) || 0;
-amount = problems;
-}
-else if (studyType === "mock-pm") {
-problems = Number(document.getElementById("mockTotal").value) || 0;
-correct = Number(document.getElementById("mockCorrect").value) || 0;
-amount = problems;
-}
-else {
-amount = problems;
-}
-
 if (studyType === "morning") {
-problems = Number(document.getElementById("amountMorning").value) || 0;
-correct = Number(document.getElementById("correctCount").value) || 0;
-amount = problems;
+    problems = Number(document.getElementById("amountMorning").value) || 0;
+    correct = Number(document.getElementById("correctCount").value) || 0;
+    amount = problems;
 }
 else if (studyType === "afternoon") {
-problems = Number(document.getElementById("amountAfternoon").value) || 0;
-correct = Number(document.getElementById("correctCount").value) || 0;
-amount = problems;
+    problems = Number(document.getElementById("amountAfternoon").value) || 0;
+    correct = Number(document.getElementById("correctCount").value) || 0;
+    amount = problems;
+}
+else if (studyType === "mock-am") {
+    problems = Number(document.getElementById("mockTotal").value) || 0;
+    correct = Number(document.getElementById("mockCorrect").value) || 0;
+    amount = problems;
+}
+else if (studyType === "mock-pm") {
+    problems = Number(document.getElementById("mockTotal").value) || 0;
+    correct = Number(document.getElementById("mockCorrect").value) || 0;
+    amount = problems;
+}
+else if (studyType === "book") {
+    amount = Number(document.getElementById("amountBook").value) || 0;
+}
+else if (studyType === "review") {
+    amount = Number(document.getElementById("amountReview").value) || 0;
 }
 
 const accuracy = problems > 0 ? correct / problems : 0;
@@ -107,6 +101,12 @@ result = accuracy >= passLine ? "pass" : "fail";
 
 let categoryValue = document.getElementById("category").value || "";
 
+// 自動補完
+if (!categoryValue) {
+    if (studyType === "morning") categoryValue = "午前問題";
+    else if (studyType === "afternoon") categoryValue = "午後問題";
+}
+
 if (studyType === "mock-am") {
 categoryValue = "模試(午前)";
 } else if (studyType === "mock-pm") {
@@ -114,19 +114,12 @@ categoryValue = "模試(午後)";
 }
 
 const record = {
-examType: document.getElementById("examType").value,
-section: document.getElementById("section").value,
-category: categoryValue,
-studyType: studyType,
-content: document.getElementById("content").value,
-amount: amount,
-problems: problems,
-correct: correct,
-accuracy: accuracy,
-result: result,
-understanding: Number(document.getElementById("level").value),
-studyDate: document.getElementById("date").value,
-evaluation: document.getElementById("evaluation")?.value || ""
+    subject: document.getElementById("subject").value,
+    studyType: studyType,
+    content: document.getElementById("content").value,
+    studyTime: Number(document.getElementById("studyTime").value) || 0,
+    understanding: Number(document.getElementById("level").value),
+    studyDate: document.getElementById("date").value
 };
 
 const tx = db.transaction("study_logs", "readwrite");
@@ -198,15 +191,11 @@ document.getElementById("filterExam")
 ?.addEventListener("change", applyFilters);
 
 function applyFilters() {
-const subject = document.getElementById("filterSubject").value;
-const section = document.getElementById("filterSection").value;
-const studyType = document.getElementById("filterStudyType").value;
-const exam = document.getElementById("filterExam").value;
+    const subject = document.getElementById("filterSubject").value;
+    const studyType = document.getElementById("filterStudyType").value;
 
-displayLogs(subject, section, studyType,exam);
+    displayLogs(subject, studyType);
 }
-
-
 
 // ==========================
 // 学習記録表示
@@ -253,22 +242,15 @@ const resultClass = r.result || "";
 
 
 tr.innerHTML = `
-<td>${r.examType}</td>
 <td>${r.studyDate}</td>
-<td>${r.category}</td>
+<td>${r.subject}</td>
 <td>${r.content}</td>
-<td>${r.section}</td>
 <td>${{
-morning: "午前問題",
-afternoon: "午後問題",
-"mock-am": "模試(午前)",
-"mock-pm": "模試(午後)",
-book: "参考書",
-review: "復習"
-}[r.studyType] || "-"}</td>
-<td>${r.amount || "-"}</td>
-<td>${accuracyText}</td>
-<td class="${resultClass}">${result}</td>
+    class: "授業",
+    self: "自主学習",
+    review: "復習"
+}[r.studyType]}</td>
+<td>${r.studyTime || "-"}</td>
 <td>${r.understanding}</td>
 `;
 
@@ -881,6 +863,8 @@ if (studyTypeSelect) {
         const selected = this.value;
         const categoryArea = document.getElementById("categoryArea");
         const categorySelect = document.getElementById("category");
+        const exam = document.getElementById("examType").value;
+        const section = document.getElementById("section").value;
 
         if (categoryArea && categorySelect) {
 
@@ -967,3 +951,18 @@ function showLogs() {
 document.getElementById("registerView").style.display = "none";
 document.getElementById("logsView").style.display = "block";
 }
+
+document.getElementById("cancelEdit").addEventListener("click", () => {
+
+    editingId = null;
+
+    const form = document.getElementById("studyForm");
+    form.reset();
+
+    document.getElementById("date").valueAsDate = new Date();
+
+    document.getElementById("submitBtn").textContent = "登録";
+    document.getElementById("submitBtn").classList.remove("edit-mode");
+
+    document.getElementById("cancelEdit").style.display = "none";
+});
