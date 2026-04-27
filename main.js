@@ -119,8 +119,23 @@ const record = {
     content: document.getElementById("content").value,
     studyTime: Number(document.getElementById("studyTime").value) || 0,
     understanding: Number(document.getElementById("level").value),
-    studyDate: document.getElementById("date").value
+    studyDate: document.getElementById("date").value,
+
+    problems,
+    correct,
+    accuracy,
+    result,
+    amount,
+
+    category: categoryValue,
+    examType: document.getElementById("examType").value,
+    section: document.getElementById("section").value
 };
+
+localStorage.setItem("lastStudyInput", JSON.stringify({
+    subject: record.subject,
+    studyType: record.studyType
+}));
 
 const tx = db.transaction("study_logs", "readwrite");
 if (editingId) {
@@ -193,8 +208,10 @@ document.getElementById("filterExam")
 function applyFilters() {
     const subject = document.getElementById("filterSubject").value;
     const studyType = document.getElementById("filterStudyType").value;
+    const section = document.getElementById("filterSection")?.value || "";
+    const exam = document.getElementById("filterExam")?.value || "";
 
-    displayLogs(subject, studyType);
+    displayLogs(subject, section, studyType, exam);
 }
 
 // ==========================
@@ -246,10 +263,13 @@ tr.innerHTML = `
 <td>${r.subject}</td>
 <td>${r.content}</td>
 <td>${{
-    class: "授業",
-    self: "自主学習",
+    morning: "午前問題",
+    afternoon: "午後問題",
+    "mock-am": "模試(午前)",
+    "mock-pm": "模試(午後)",
+    book: "参考書",
     review: "復習"
-}[r.studyType]}</td>
+}[r.studyType] || r.studyType}</td>
 <td>${r.studyTime || "-"}</td>
 <td>${r.understanding}</td>
 `;
@@ -904,6 +924,18 @@ if (studyTypeSelect) {
     });
 }
 
+const last = JSON.parse(localStorage.getItem("lastStudyInput") || "{}");
+
+if (last.subject) {
+    document.getElementById("subject").value = last.subject;
+}
+
+if (last.studyType) {
+    const el = document.getElementById("studyType");
+    el.value = last.studyType;
+    el.dispatchEvent(new Event("change"));
+}
+
 });
 
 function loadForEdit(record) {
@@ -966,3 +998,35 @@ document.getElementById("cancelEdit").addEventListener("click", () => {
 
     document.getElementById("cancelEdit").style.display = "none";
 });
+
+
+function updateSubjectCandidates() {
+
+    const datalist = document.getElementById("subjectList");
+    const tx = db.transaction("study_logs", "readonly");
+    const store = tx.objectStore("study_logs");
+
+    const subjects = new Set();
+
+    store.openCursor().onsuccess = (e) => {
+        const cursor = e.target.result;
+
+        if (!cursor) {
+            datalist.innerHTML = "";
+
+            subjects.forEach(s => {
+                const option = document.createElement("option");
+                option.value = s;
+                datalist.appendChild(option);
+            });
+
+            return;
+        }
+
+        if (cursor.value.subject) {
+            subjects.add(cursor.value.subject);
+        }
+
+        cursor.continue();
+    };
+}
