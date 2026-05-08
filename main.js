@@ -66,8 +66,19 @@ else if (studyType === "book") {
     amount = Number(document.getElementById("amountBook").value) || 0;
 }
 else if (studyType === "review") {
-    const el = document.getElementById("amountReview");
-    amount = Number(el?.value) || 0;
+    amount = Number(document.getElementById("amountReview").value) || 0;
+}
+
+const studyTimeEl = document.getElementById("studyTime");
+
+if (studyTimeEl) {
+
+    const studyTime = Number(studyTimeEl.value);
+
+    if (studyTime < 0) {
+        alert("学習時間は0以上で入力してください");
+        return;
+    }
 }
 
 const record = {
