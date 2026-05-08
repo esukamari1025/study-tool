@@ -18,14 +18,14 @@
 <div class="section">
 <h2>学習記録の登録</h2>
 <form id="studyForm">
-
+<h3><font color="red">*</font> 必須項目</h3>
 <label>
 学習日：
 <input type="date" id="date" required>
 </label><br>
 
 <label>
-学習区分：
+学習区分 <font color="red">*</font>：
 <select id="studyType">
 <option value="" disabled selected>選択してください</option>
 <option value="class">授業</option>
@@ -35,13 +35,13 @@
 </label><br>
 
 <label>
-科目：
+科目 <font color="red">*</font>：
 <input type="text" id="subject" list="subjectList" required>
 <datalist id="subjectList"></datalist>
 </label>
 
 <label>
-学習内容：
+学習内容 <font color="red">*</font>：
 <input type="text" id="content" required>
 </label><br>
 
@@ -51,7 +51,7 @@
 </label><br>
 
 <label>
-理解度（1〜5）：
+理解度（1〜5）<font color="red">*</font>：
 <select id="level" required>
 <option value="" disabled selected>選択してください</option>
 <option value="1">1（低い）</option>
