@@ -539,6 +539,7 @@ document.getElementById("cancelEdit").addEventListener("click", () => {
     document.getElementById("submitBtn").classList.remove("edit-mode");
 
     document.getElementById("cancelEdit").style.display = "none";
+    showLogs();
 });
 
 
