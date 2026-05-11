@@ -66,7 +66,7 @@ else if (studyType === "book") {
     amount = Number(document.getElementById("amountBook").value) || 0;
 }
 else if (studyType === "review") {
-    amount = Number(document.getElementById("amountReview").value) || 0;
+    amount = Number(document.getElementById("studyTime").value) || 0;
 }
 
 const studyTimeEl = document.getElementById("studyTime");
