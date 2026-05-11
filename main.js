@@ -115,6 +115,7 @@ tx.objectStore("study_logs").add(record);
 tx.oncomplete = () => {
 e.target.reset();
 document.getElementById("date").valueAsDate = new Date();
+updateFilterOptionsAll();
 displayLogs();
 updateSubjectCandidates();
 showToast(
