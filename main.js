@@ -508,6 +508,7 @@ function loadForEdit(record) {
     document.getElementById("level").value = record.understanding;
     document.getElementById("date").value = record.studyDate;
     document.getElementById("subject").value = record.subject;
+    document.getElementById("studyTime").value = record.studyTime;
 
     document.getElementById("submitBtn").textContent = "更新";
     document.getElementById("submitBtn").classList.add("edit-mode");
