@@ -98,11 +98,7 @@ showToast("苦手メモを削除しました");
 
 
 function priorityLabel(priority) {
-return {
-1: "高",
-2: "中",
-3: "低"
-}[Number(priority)] || "";
+    return PRIORITY_LABELS[Number(priority)] || "";
 }
 
 
