@@ -133,31 +133,6 @@ showLogs();
 };
 });
 
-
-// ==========================
-// 苦手メモ  記録
-// ==========================
-document.getElementById("weakForm").addEventListener("submit", (e) => {
-e.preventDefault();
-
-const record = {
-subject: document.getElementById("weakSubject").value,
-content: document.getElementById("weakContent").value,
-priority: Number(document.getElementById("weakPriority").value)
-};
-
-const tx = db.transaction("weak_points", "readwrite");
-tx.objectStore("weak_points").add(record);
-
-tx.oncomplete = () => {
-e.target.reset();
-displayWeakPoints();
-showToast("苦手メモを追加しました", "success");
-};
-});
-
-
-
 // ==========================
 // フィルター
 // ==========================
