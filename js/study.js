@@ -6,6 +6,13 @@ e.preventDefault();
 
 const studyType = document.getElementById("studyType").value;
 
+const studyDate = document.getElementById("date").value;
+
+if (!studyDate) {
+    alert("学習日を入力してください");
+    return;
+}
+
 let amount = 0;
 
 if (studyType === "class" || studyType === "self") {
