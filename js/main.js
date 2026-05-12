@@ -59,8 +59,16 @@ if (last.studyType) {
 
 document.getElementById("date").valueAsDate = new Date();
 
-updateSubjectFilterOptions();
-displayLogs();
-displayWeakPoints();
+// const currentView = localStorage.getItem("currentView");
+
+// if (currentView === "logs") {
+//     showLogs();
+// } else {
+//     showRegister();
+// }
+
+// updateSubjectFilterOptions();
+// displayLogs();
+// displayWeakPoints();
 
 });

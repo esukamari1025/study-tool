@@ -14,11 +14,15 @@ toast.className = "toast";
 function showRegister() {
 document.getElementById("registerView").style.display = "block";
 document.getElementById("logsView").style.display = "none";
+
+localStorage.setItem("currentView", "register");
 }
 
 function showLogs() {
 document.getElementById("registerView").style.display = "none";
 document.getElementById("logsView").style.display = "block";
+
+localStorage.setItem("currentView", "logs");
 }
 
 

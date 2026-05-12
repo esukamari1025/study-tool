@@ -36,9 +36,22 @@ weakStore.createIndex("priority", "priority", { unique: false });
 };
 
 request.onsuccess = (event) => {
-db = event.target.result;
-
-};
+    db = event.target.result;
+    
+    document.getElementById("date").valueAsDate = new Date();
+    
+    updateSubjectFilterOptions();
+    displayLogs();
+    displayWeakPoints();
+    
+    const currentView = localStorage.getItem("currentView");
+    
+    if (currentView === "logs") {
+        showLogs();
+    } else {
+        showRegister();
+    }
+    };
 
 request.onerror = () => {
 console.error("DB open failed");

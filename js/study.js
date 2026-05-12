@@ -85,6 +85,8 @@ const btn = document.getElementById("submitBtn");
 btn.textContent = "登録";
 btn.classList.remove("edit-mode");
 
+document.getElementById("cancelEdit").style.display = "none";
+
 showLogs();
 };
 });
