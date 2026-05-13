@@ -50,7 +50,12 @@ const record = {
 };
 
 if (!record.subject.trim()) {
-    alert("科目を入力して");
+    alert("科目を入力してください");
+    return;
+}
+
+if (!record.content.trim()) {
+    alert("学習内容を入力してください");
     return;
 }
 
