@@ -18,7 +18,7 @@ const records = [];
 
 const selectedPriority =
 priority ||
-document.getElementById("filterWeakPriority")?.value;
+document.getElementById("filterWeakPriority")?.value || "";
 
 const tx = db.transaction("weak_points", "readonly");
 const store = tx.objectStore("weak_points");
@@ -125,10 +125,18 @@ function priorityLabel(priority) {
 document.getElementById("weakForm").addEventListener("submit", (e) => {
 e.preventDefault();
 
+const subject = document.getElementById("weakSubject").value.trim();
+const content = document.getElementById("weakContent").value.trim();
+
+if (!subject || !content) {
+    alert("科目と内容を入力してください");
+    return;
+}
+
 const record = {
-subject: document.getElementById("weakSubject").value,
-content: document.getElementById("weakContent").value,
-priority: Number(document.getElementById("weakPriority").value)
+    subject: subject,
+    content: content,
+    priority: Number(document.getElementById("weakPriority").value)
 };
 
 const tx = db.transaction("weak_points", "readwrite");
