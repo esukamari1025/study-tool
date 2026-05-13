@@ -100,7 +100,7 @@ showLogs();
 // ==========================
 // 学習記録表示
 // ==========================
-function displayLogs({subject="", section="", studyType="", exam=""} = {}){
+function displayLogs({subject="", section="", studyType="", exam="", level=""} = {}){
 
 const tbody = document.getElementById("logList");
 tbody.innerHTML = "";
@@ -177,6 +177,11 @@ return;
 }
 
 if (studyType && r.studyType !== studyType) {
+cursor.continue();
+return;
+}
+
+if (level && String(r.understanding) !== level) {
 cursor.continue();
 return;
 }

@@ -2,7 +2,12 @@
 // ==========================
 // 苦手メモ 表示
 // ==========================
-function displayWeakPoints() {
+document.getElementById("filterWeakPriority")
+?.addEventListener("change", () => {
+    displayWeakPoints();
+});
+
+function displayWeakPoints(priority = "") {
 
 const ul = document.getElementById("weakList");
 if (!ul) return;
@@ -10,6 +15,10 @@ if (!ul) return;
 ul.innerHTML = "";
 
 const records = [];
+
+const selectedPriority =
+priority ||
+document.getElementById("filterWeakPriority")?.value;
 
 const tx = db.transaction("weak_points", "readonly");
 const store = tx.objectStore("weak_points");
@@ -60,6 +69,14 @@ if (!cursor) {
 
     });
 
+    return;
+}
+
+if (
+    selectedPriority &&
+    String(cursor.value.priority) !== selectedPriority
+) {
+    cursor.continue();
     return;
 }
 
