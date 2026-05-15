@@ -122,6 +122,12 @@ records.forEach(r => {
 
 const tr = document.createElement("tr");
 
+tr.style.cursor = "pointer";
+
+tr.addEventListener("click", () => {
+    loadForReuse(r);
+});
+
 if (r.understanding <= 2) tr.classList.add("level-low");
 else if (r.understanding === 3) tr.classList.add("level-mid");
 else tr.classList.add("level-high");
@@ -152,13 +158,19 @@ const td = document.createElement("td");
 const editBtn = document.createElement("button");
 editBtn.textContent = "編集";
 editBtn.classList.add("edit-btn");
-editBtn.onclick = () => loadForEdit(r);
+editBtn.onclick = (e) => {
+    e.stopPropagation();
+    loadForEdit(r);
+};
 td.appendChild(editBtn);
 
 const btn = document.createElement("button");
 btn.textContent = "削除";
 btn.classList.add("delete-btn");
-btn.onclick = () => deleteLog(r);
+btn.onclick = (e) => {
+    e.stopPropagation();
+    deleteLog(r);
+};
 td.appendChild(btn);
 tr.appendChild(td);
 
@@ -236,6 +248,33 @@ document.getElementById("submitBtn").classList.add("edit-mode");
 
 window.scrollTo({ top: 0, behavior: "smooth" });
 document.getElementById("cancelEdit").style.display = "inline-block";
+}
+
+function loadForReuse(record) {
+
+    showRegister();
+
+    editingId = null;
+
+    document.getElementById("studyType").value = record.studyType;
+    document.getElementById("studyType")
+    .dispatchEvent(new Event("change"));
+
+    document.getElementById("content").value = record.content;
+    document.getElementById("subject").value = record.subject;
+    document.getElementById("studyTime").value = record.studyTime;
+    document.getElementById("level").value = record.understanding;
+
+    // 日付は今日
+    document.getElementById("date").valueAsDate = new Date();
+
+    document.getElementById("submitBtn").textContent = "登録";
+    document.getElementById("submitBtn")
+    .classList.remove("edit-mode");
+
+    document.getElementById("cancelEdit").style.display = "none";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function updateSubjectCandidates() {
