@@ -13,6 +13,16 @@ if (!studyDate) {
     return;
 }
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const inputDate = new Date(studyDate);
+
+if (inputDate > today) {
+    alert("未来の日付は入力できません");
+    return;
+}
+
 let amount = 0;
 
 if (studyType === "class" || studyType === "self") {
