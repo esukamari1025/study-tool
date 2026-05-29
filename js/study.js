@@ -56,13 +56,32 @@ const record = {
 
 };
 
-if (!record.subject.trim()) {
+const subject = record.subject.trim();
+const content = record.content.trim();
+
+if (!subject) {
     alert("科目を入力してください");
     return;
 }
 
-if (!record.content.trim()) {
+if (!content) {
     alert("学習内容を入力してください");
+    return;
+}
+
+// 日本語・英数字が含まれているか
+if (!/[ぁ-んァ-ヶ一-龠a-zA-Z0-9]/.test(subject)) {
+    alert("科目には文字を入力してください");
+    return;
+}
+
+if (!/[ぁ-んァ-ヶ一-龠a-zA-Z0-9]/.test(content)) {
+    alert("学習内容には文字を入力してください");
+    return;
+}
+
+if (/[<>;&]/.test(subject) || /[<>;&]/.test(content)) {
+    alert("使用できない記号が含まれています");
     return;
 }
 
