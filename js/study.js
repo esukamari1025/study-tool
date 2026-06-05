@@ -126,7 +126,7 @@ showLogs();
 // ==========================
 // 学習記録表示
 // ==========================
-function displayLogs({subject="", section="", studyType="", exam="", level=""} = {}){
+function displayLogs({subject="", studyType="", level=""} = {}){
 
 const tbody = document.getElementById("logList");
 tbody.innerHTML = "";

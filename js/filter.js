@@ -7,12 +7,6 @@ document.getElementById("filterSubject")
 document.getElementById("filterStudyType")
 ?.addEventListener("change", applyFilters);
 
-document.getElementById("filterSection")
-?.addEventListener("change", applyFilters);
-
-document.getElementById("filterExam")
-?.addEventListener("change", applyFilters);
-
 document.getElementById("filterLevel")
 ?.addEventListener("change", applyFilters);
 
@@ -58,8 +52,6 @@ const filters = {
     subject: document.getElementById("filterSubject")?.value || "",
     studyType: document.getElementById("filterStudyType")?.value || "",
     level: document.getElementById("filterLevel")?.value || "",
-    section: document.getElementById("filterSection")?.value || "",
-    exam: document.getElementById("filterExam")?.value || ""
 };
 
 displayLogs(filters);
