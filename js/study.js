@@ -20,17 +20,6 @@ if (studyDate > today) {
     return;
 }
 
-let amount = 0;
-
-if (studyType === "class" || studyType === "self") {
-    amount = Number(document.getElementById("studyTime").value) || 0;
-}
-else if (studyType === "book") {
-    amount = Number(document.getElementById("amountBook").value) || 0;
-}
-else if (studyType === "review") {
-    amount = Number(document.getElementById("studyTime").value) || 0;
-}
 
 const studyTimeEl = document.getElementById("studyTime");
 
@@ -51,8 +40,6 @@ const record = {
     studyTime: Number(document.getElementById("studyTime").value) || 0,
     understanding: Number(document.getElementById("level").value),
     studyDate: document.getElementById("date").value,
-
-    amount,
 
 };
 
@@ -159,17 +146,6 @@ else if (r.understanding === 3) tr.classList.add("level-mid");
 else tr.classList.add("level-high");
 
 
-const accuracyText = r.problems > 0
-? (r.accuracy * 100).toFixed(1) + "%"
-: "-";
-
-const result =
-r.result === "pass" ? "合格圏"
-: r.result === "fail" ? "未達"
-: "-";
-
-const resultClass = r.result || "";
-
 
 tr.innerHTML = `
 <td>${r.studyDate}</td>
@@ -250,7 +226,6 @@ tx.oncomplete = () => {
 showToast("学習記録を削除しました","delete");
 
 const subject =
-document.getElementById("filterSubject").value;
 applyFilters();
 };
 }
@@ -291,7 +266,6 @@ function loadForReuse(record) {
     document.getElementById("studyTime").value = record.studyTime;
     document.getElementById("level").value = record.understanding;
 
-    // 日付は今日
     document.getElementById("date").valueAsDate = new Date();
 
     document.getElementById("submitBtn").textContent = "登録";

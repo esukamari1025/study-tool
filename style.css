@@ -198,36 +198,7 @@ body {
     border-left: 4px solid #2ecc71;
     }
     
-    .priority-badge {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-right: 6px;
-    }
-    
-    .badge-high { background: #e74c3c; color: #fff; }
-    .badge-mid  { background: #f39c12; color: #fff; }
-    .badge-low  { background: #2ecc71; color: #fff; }
-    
-    .amount-field {
-    display: none;
-    margin-top: 8px;
-    }
-    
-    .avg-weak {
-    background-color: #fdecea;
-    border-left: 4px solid #e74c3c;
-    }
-    
-    .avg-normal {
-    background-color: #f4f6f8;
-    }
-    
-    .avg-strong {
-    background-color: #eafaf1;
-    border-left: 4px solid #2ecc71;
-    }
-    
+
     .toast {
     position: fixed;
     bottom: 30px;
@@ -276,9 +247,6 @@ body {
     flex-wrap: wrap;
     margin-bottom: 15px;
     }
-    
-    .pass { color: #e74c3c; font-weight: bold; }
-    .fail { color: #00CCFF; font-weight: bold; }
     
     
     /* 削除ボタン専用 */
