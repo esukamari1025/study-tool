@@ -1,178 +1,175 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<title>学習記録管理アプリ</title>
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/png" href="img/faviconIcon.png">
-</head>
-<body>
+    <html lang="ja">
+        <head>
+        <meta charset="UTF-8">
+        <title>学習記録管理アプリ</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" type="image/png" href="img/faviconIcon.png">
+        </head>
+        <body>
+            <h1>学習記録管理</h1>
+            <div class="tabs">
+                <button onclick="showRegister()">登録</button>
+                <button onclick="showLogs()">記録一覧</button>
+            </div>
 
-<h1>学習記録管理</h1>
+                <div id="registerView">
+                    <div class="section">
+                        <h2>学習記録の登録</h2>
+                        <form id="studyForm">
+                            <h3><font color="red">*</font> 必須項目</h3>
+                                <label>
+                                学習日 <font color="red">*</font>：
+                                <input type="date" id="date" required>
+                                </label><br>
 
-<div class="tabs">
-    <button onclick="showRegister()">登録</button>
-    <button onclick="showLogs()">記録一覧</button>
-</div>
+                                <label>
+                                学習区分 <font color="red">*</font>：
+                                <select id="studyType">
+                                <option value="class" selected>授業</option>
+                                <option value="self">自主学習</option>
+                                <option value="review">復習</option>
+                                </select>
+                                </label><br>
 
-<div id="registerView">
-<div class="section">
-<h2>学習記録の登録</h2>
-<form id="studyForm">
-<h3><font color="red">*</font> 必須項目</h3>
-<label>
-学習日 <font color="red">*</font>：
-<input type="date" id="date" required>
-</label><br>
+                                <label>
+                                科目 <font color="red">*</font>：
+                                <input type="text" id="subject" list="subjectList" required>
+                                <datalist id="subjectList"></datalist>
+                                </label>
 
-<label>
-学習区分 <font color="red">*</font>：
-<select id="studyType">
-<option value="class" selected>授業</option>
-<option value="self">自主学習</option>
-<option value="review">復習</option>
-</select>
-</label><br>
+                                <label>
+                                学習内容 <font color="red">*</font>：
+                                <input type="text" id="content" required>
+                                </label><br>
 
-<label>
-科目 <font color="red">*</font>：
-<input type="text" id="subject" list="subjectList" required>
-<datalist id="subjectList"></datalist>
-</label>
+                                <label>
+                                学習時間（分）：
+                                <input type="number" id="studyTime" min="0">
+                                </label><br>
 
-<label>
-学習内容 <font color="red">*</font>：
-<input type="text" id="content" required>
-</label><br>
+                                <label>
+                                理解度（1〜5）<font color="red">*</font>：
+                                <select id="level" required>
+                                <option value="" disabled selected>選択してください</option>
+                                <option value="1">1（低い）</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5（高い）</option>
+                                </select>
+                                </label><br>
 
-<label>
-学習時間（分）：
-<input type="number" id="studyTime" min="0">
-</label><br>
+                                <button type="submit" id="submitBtn">登録</button>
+                                <button type="button" id="cancelEdit" style="display:none;">キャンセル</button>
+                        </form>
+                    </div>
+                </div>
 
-<label>
-理解度（1〜5）<font color="red">*</font>：
-<select id="level" required>
-<option value="" disabled selected>選択してください</option>
-<option value="1">1（低い）</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5（高い）</option>
-</select>
-</label><br>
+            <div id="logsView" style="display: none;">
+                <div class="section">
+                    <h2>学習記録一覧</h2>
+                        <div class="filter-area">
 
-<button type="submit" id="submitBtn">登録</button>
-<button type="button" id="cancelEdit" style="display:none;">キャンセル</button>
-</form>
-</div>
-</div>
+                            <label>
+                            科目で絞り込み：
+                            <select id="filterSubject">
+                            <option value="">すべて</option>
+                            </select>
+                            </label>
 
-<div id="logsView" style="display: none;">
-<div class="section">
-<h2>学習記録一覧</h2>
-<div class="filter-area">
+                            <label>
+                            学習区分で絞り込み：
+                            <select id="filterStudyType">
+                            <option value="">すべて</option>
+                            <option value="class">授業</option>
+                            <option value="self">自主学習</option>
+                            <option value="review">復習</option>
+                            </select>
+                            </label>
 
-<label>
-科目で絞り込み：
-<select id="filterSubject">
-<option value="">すべて</option>
-</select>
-</label>
+                            <label>
+                            理解度：
+                            <select id="filterLevel">
+                            <option value="">すべて</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            </select>
+                            </label>
 
-<label>
-学習区分で絞り込み：
-<select id="filterStudyType">
-<option value="">すべて</option>
-<option value="class">授業</option>
-<option value="self">自主学習</option>
-<option value="review">復習</option>
-</select>
-</label>
+                        </div>
 
-<label>
-理解度：
-<select id="filterLevel">
-<option value="">すべて</option>
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5</option>
-</select>
-</label>
+                        <p class="note">※理解度に応じて色分けしています</p>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>日付</th>
+                                <th>科目</th>
+                                <th>内容</th>
+                                <th>学習区分</th>
+                                <th>学習時間(分)</th>
+                                <th>理解度</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logList"></tbody>
+                    </table>
+                </div>
+            </div>
 
-</div>
+                <div class="section">
+                    <h3>苦手メモ</h3>
 
-<p class="note">※理解度に応じて色分けしています</p>
-<table border="1">
-<thead>
-<tr>
-    <th>日付</th>
-    <th>科目</th>
-    <th>内容</th>
-    <th>学習区分</th>
-    <th>学習時間(分)</th>
-    <th>理解度</th>
-    <th>操作</th>
-</tr>
-</thead>
-<tbody id="logList">
-</tbody>
-</table>
-</div>
+                        <form id="weakForm">
+                            <h3><font color="red">*</font> 必須項目</h3>
+                                <label>
+                                科目 <font color="red">*</font>：
+                                <input type="text" id="weakSubject" required>
+                                </label>
 
-<div class="section">
-<h3>苦手メモ</h3>
+                                <label>
+                                内容 <font color="red">*</font>：
+                                <input type="text" id="weakContent" required>
+                                </label>
 
-<form id="weakForm">
-<h3><font color="red">*</font> 必須項目</h3>
-<label>
-科目 <font color="red">*</font>：
-<input type="text" id="weakSubject" required>
-</label>
+                                <label>優先度：
+                                    <select id="weakPriority">
+                                        <option value="1">高</option>
+                                        <option value="2">中</option>
+                                        <option value="3">低</option>
+                                    </select>
+                                </label>
 
-<label>
-内容 <font color="red">*</font>：
-<input type="text" id="weakContent" required>
-</label>
+                            <button type="submit">メモ追加</button>
+                        </form>
 
-<label>
-優先度：
-<select id="weakPriority">
-<option value="1">高</option>
-<option value="2">中</option>
-<option value="3">低</option>
-</select>
-</label>
+                        <label>優先度：
+                            <select id="filterWeakPriority">
+                                <option value="">すべて</option>
+                                <option value="1">高</option>
+                                <option value="2">中</option>
+                                <option value="3">低</option>
+                            </select>
+                        </label>
 
-<button type="submit">メモ追加</button>
-</form>
+                    <ul id="weakList"></ul>
 
-<label>
-優先度：
-<select id="filterWeakPriority">
-<option value="">すべて</option>
-<option value="1">高</option>
-<option value="2">中</option>
-<option value="3">低</option>
-</select>
-</label>
+                    <script src="js/constants.js" defer></script>
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<ul id="weakList"></ul>
+                    <script src="js/ui.js" defer></script>
+                    <script src="js/filter.js" defer></script>
+                    <script src="js/study.js" defer></script>
+                    <script src="js/weakpoint.js" defer></script>
 
-<script src="js/constants.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script src="js/db.js" defer></script>
+                    <script src="js/main.js" defer></script>
 
-<script src="js/ui.js" defer></script>
-<script src="js/filter.js" defer></script>
-<script src="js/study.js" defer></script>
-<script src="js/weakpoint.js" defer></script>
+                    <div id="toast" class="toast"></div>
+                </div>
 
-<script src="js/db.js" defer></script>
-<script src="js/main.js" defer></script>
-
-<div id="toast" class="toast"></div>
-
-</body>
+        </body>
 </html>

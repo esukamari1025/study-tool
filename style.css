@@ -5,95 +5,110 @@ body {
     margin: 0;
     padding: 20px;
     color: #333;
-    }
-    
-    section {
-    border-left: 5px solid #3498db;
-    }
-    
-    tbody tr:hover {
+}
+
+tbody tr:hover {
     background-color: #f0f8ff;
-    }
-    
-    
-    /* 見出し */
-    h1, h2, h3 {
+}
+
+/* 見出し */
+h1, h2, h3 {
     color: #2c3e50;
     margin-top: 30px;
-    }
-    
-    section, form, ul, table, canvas {
+}
+
+form,
+ul,
+table,
+canvas {
     background: #fff;
     padding: 15px 20px;
     margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    
-    /* フォーム */
-    form label {
+}
+
+/* フォーム */
+form label {
     display: block;
     margin-bottom: 10px;
-    }
-    
-    input, button {
+}
+
+input,
+button {
     height: auto;
-    padding: 8px 8px;
+    padding: 8px;
     font-size: 14px;
-    line-height:  1.4;
-    }
-    
-    select {
+    line-height: 1.4;
+}
+
+select {
     height: auto;
     min-height: 40px;
     padding: 6px 8px;
     font-size: 14px;
-    }
-    
-    
-    
-    button {
+}
+
+label {
+    font-weight: bold;
+}
+
+input:focus,
+select:focus {
+    outline: 2px solid #3498db;
+}
+
+/* ボタン共通 */
+button {
     background-color: #3498db;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    }
-    
-    td button,li button {
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+td button,
+li button {
     font-size: 12px;
     padding: 4px 8px;
-    }
-    
-    
-    button:hover {
-    background-color: #2980b9;
-    }
-    
-    /* テーブル */
-    table {
+}
+
+/* テーブル */
+table {
     width: 100%;
     border-collapse: collapse;
-    }
-    
-    th, td {
+}
+
+th,
+td {
     border-bottom: 1px solid #ddd;
     padding: 8px;
     text-align: left;
-    }
-    
-    th {
+}
+
+th {
     background-color: #ecf0f1;
-    }
-    
-    
-    td button:hover,
-    li button:hover {
-    background-color: #c0392b;
-    }
-    
-    /* 苦手メモ1行のレイアウト */
-    .weak-item {
+}
+
+/* 理解度色分け */
+.level-low {
+    background-color: #ffe5e5;
+}
+
+.level-mid {
+    background-color: #fff4cc;
+}
+
+.level-high {
+    background-color: #e6fffa;
+}
+
+/* 苦手メモ1行のレイアウト */
+.weak-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -102,104 +117,44 @@ body {
     border: 1px solid #ccc;
     border-radius: 6px;
     background-color: #f9f9f9;
-    }
-    
-    /* 削除ボタン */
-    .delete-btn {
-    padding: 4px 8px;
-    font-size: 12px;
-    }
-    
-    .delete-btn {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    }
-    
-    .delete-btn:hover {
-    background-color: #e60000;
-    }
-    
-    
-    
-    /* 優先度：高 */
-    #weakList li.weak {
+}
+
+/* 優先度：高 */
+#weakList li.weak {
     background-color: #fdecea;
     border-left: 4px solid #e74c3c;
     font-weight: bold;
-    }
-    
-    /* 優先度：中 */
-    #weakList li.normal {
+}
+
+/* 優先度：中 */
+#weakList li.normal {
     background-color: #fff8e1;
     border-left: 4px solid #f39c12;
-    }
-    
-    /* 優先度：低 */
-    #weakList li.strong {
+}
+
+/* 優先度：低 */
+#weakList li.strong {
     background-color: #eafaf1;
     border-left: 4px solid #2ecc71;
-    }
-    
-    /* 平均理解度 */
-    #subjectAverage li {
-    font-weight: bold;
-    }
-    
-    #subjectAverage {
-    padding-left: 0;
-    }
-    
-    #subjectAverage li {
-    list-style: none;
-    padding: 6px 10px;
-    margin-bottom: 6px;
-    border-radius: 4px;
-    background-color: #f4f6f8;
-    }
-    
-    label {
-    font-weight: bold;
-    }
-    
-    input:focus, select:focus {
-    outline: 2px solid #3498db;
-    }
-    
-    .level-low {
-    background-color: #ffe5e5; /* 赤 */
-    }
-    
-    .level-mid {
-    background-color: #fff4cc; /* 黄色 */
-    }
-    
-    .level-high {
-    background-color: #e6fffa; /* 緑 */
-    }
-    
-    
-    /* 苦手（赤） */
-    .weak {
+}
+
+/* 汎用優先度クラス */
+.weak {
     background-color: #fdecea;
     border-left: 4px solid #e74c3c;
-    }
-    
-    /* 普通 */
-    .normal {
+}
+
+.normal {
     background-color: #f4f6f8;
-    }
-    
-    /* 得意（緑） */
-    .strong {
+}
+
+.strong {
     background-color: #eafaf1;
     border-left: 4px solid #2ecc71;
-    }
-    
+}
 
-    .toast {
+/* トースト通知 */
+.toast {
     position: fixed;
     bottom: 30px;
     right: 30px;
@@ -211,82 +166,75 @@ body {
     transform: translateY(20px);
     transition: all 0.3s ease;
     z-index: 9999;
-    }
-    
-    .toast.show {
+}
+
+.toast.show {
     opacity: 1;
     transform: translateY(0);
-    }
-    
-    .toast.success {
+}
+
+.toast.success {
     background-color: #4CAF50;
-    }
-    
-    .toast.delete {
+}
+
+.toast.delete {
     background-color: #e74c3c;
-    }
-    
-    .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    }
-    
-    .section {
+}
+
+/* セクション */
+.section {
     background: white;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     margin-bottom: 30px;
-    }
-    
-    
-    .filter-area {
+}
+
+.filter-area {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
     margin-bottom: 15px;
-    }
-    
-    
-    /* 削除ボタン専用 */
-    .delete-btn {
-        margin-left: 10px;
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    
-    .delete-btn::before {
-        content: "🗑 ";
-    }
-    
-    .delete-btn:hover {
-        background-color: #c0392b;
-    }
-    
-    /* 編集ボタン専用 */
-    .edit-btn {
-        margin-left: 10px;
-        background-color: #3498db;
-        color: white;
-    }
-    
-    .edit-btn::before {
-        content: "✏️ ";
-    }
-    
-    .edit-btn:hover {
-        background-color: #2980b9;
-    }
-    
-    .edit-mode {
-        background-color: #f39c12; /* オレンジ */
-    }
-    
-    .edit-mode:hover {
-        background-color: #e67e22;
-    }
-    
+}
+
+/* 削除ボタン専用 */
+.delete-btn {
+    margin-left: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.delete-btn::before {
+    content: "🗑 ";
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+/* 編集ボタン専用 */
+.edit-btn {
+    margin-left: 10px;
+    background-color: #3498db;
+    color: white;
+}
+
+.edit-btn::before {
+    content: "✏️ ";
+}
+
+.edit-btn:hover {
+    background-color: #2980b9;
+}
+
+/* 編集モード */
+.edit-mode {
+    background-color: #f39c12;
+}
+
+.edit-mode:hover {
+    background-color: #e67e22;
+}

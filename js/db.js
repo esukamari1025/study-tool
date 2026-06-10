@@ -41,6 +41,8 @@ request.onsuccess = (event) => {
     document.getElementById("date").valueAsDate = new Date();
     
     updateSubjectFilterOptions();
+    updateSubjectCandidates();
+
     displayLogs();
     displayWeakPoints();
     

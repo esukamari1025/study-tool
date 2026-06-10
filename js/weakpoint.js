@@ -7,7 +7,7 @@ document.getElementById("filterWeakPriority")
     displayWeakPoints();
 });
 
-function displayWeakPoints(priority = "") {
+function displayWeakPoints() {
 
 const ul = document.getElementById("weakList");
 if (!ul) return;
@@ -17,7 +17,6 @@ ul.innerHTML = "";
 const records = [];
 
 const selectedPriority =
-priority ||
 document.getElementById("filterWeakPriority")?.value || "";
 
 const tx = db.transaction("weak_points", "readonly");

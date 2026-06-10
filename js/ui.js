@@ -30,8 +30,7 @@ document.getElementById("cancelEdit").addEventListener("click", () => {
 
 editingId = null;
 
-const form = document.getElementById("studyForm");
-form.reset();
+document.getElementById("studyForm").reset();
 
 document.getElementById("date").valueAsDate = new Date();
 

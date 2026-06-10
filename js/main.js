@@ -16,6 +16,4 @@ if (last.studyType) {
     el.dispatchEvent(new Event("change"));
 }
 
-document.getElementById("date").valueAsDate = new Date();
-
 });

@@ -225,7 +225,6 @@ tx.oncomplete = () => {
 
 showToast("学習記録を削除しました","delete");
 
-const subject =
 applyFilters();
 };
 }
@@ -237,7 +236,6 @@ showRegister();
 editingId = record.id;
 
 document.getElementById("studyType").value = record.studyType;
-document.getElementById("studyType").dispatchEvent(new Event("change"));
 document.getElementById("content").value = record.content;
 document.getElementById("level").value = record.understanding;
 document.getElementById("date").value = record.studyDate;
@@ -258,8 +256,6 @@ function loadForReuse(record) {
     editingId = null;
 
     document.getElementById("studyType").value = record.studyType;
-    document.getElementById("studyType")
-    .dispatchEvent(new Event("change"));
 
     document.getElementById("content").value = record.content;
     document.getElementById("subject").value = record.subject;
