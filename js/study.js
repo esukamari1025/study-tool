@@ -88,6 +88,7 @@ tx.objectStore("study_logs").add(record);
 
 tx.oncomplete = () => {
 e.target.reset();
+restoreLastInput();
 document.getElementById("date").valueAsDate = new Date();
 updateSubjectFilterOptions();
 displayLogs();
