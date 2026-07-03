@@ -14,4 +14,3 @@ if (last.studyType) {
 }
 
 });
-// test
