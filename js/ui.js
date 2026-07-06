@@ -15,6 +15,8 @@ function showRegister() {
 document.getElementById("registerView").style.display = "block";
 document.getElementById("logsView").style.display = "none";
 
+restoreLastInput();
+
 localStorage.setItem("currentView", "register");
 }
 
